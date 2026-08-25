@@ -5,7 +5,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
-import { ipcMain, shell } from 'electron'
+import { app, ipcMain, shell } from 'electron'
 
 import { installDesktopPluginFromGit, probePluginRepo } from './desktop-plugin-install'
 import { readDirForIpc } from './fs-read-dir'
@@ -199,5 +199,26 @@ export function registerFsIpc({
     await shell.trashItem(target)
 
     return true
+  })
+
+  // Imports a wallpaper image into the persistent userData/wallpaper directory.
+  // This ensures the custom wallpaper survives across package updates or source file deletions.
+  ipcMain.handle('hermes:wallpaper:import', async (_event, sourcePath) => {
+    const src = String(sourcePath || '').trim()
+
+    if (!src || !fs.existsSync(src)) {
+      throw new Error('Invalid or missing source file')
+    }
+
+    const wallpaperDir = path.join(app.getPath('userData'), 'wallpaper')
+    await fs.promises.mkdir(wallpaperDir, { recursive: true })
+
+    const ext = path.extname(src) || '.png'
+    const fileName = `custom_backdrop_${Date.now()}${ext}`
+    const dest = path.join(wallpaperDir, fileName)
+
+    await fs.promises.copyFile(src, dest)
+
+    return { path: dest }
   })
 }

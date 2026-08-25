@@ -45,6 +45,16 @@ import {
   TRANSLUCENCY_SUPPORTED
 } from '@/store/translucency'
 import { $vibeHeartsEnabled, setVibeHeartsEnabled } from '@/store/vibe-hearts-enabled'
+import {
+  $wallpaperSettings,
+  setWallpaperBlur,
+  setWallpaperCustomPath,
+  setWallpaperDim,
+  setWallpaperFit,
+  setWallpaperMode,
+  setWallpaperOpacity,
+  setWallpaperPosition
+} from '@/store/wallpaper'
 import { $zoomPercent, setZoomPercent } from '@/store/zoom'
 import { getBaseColors, useTheme } from '@/themes/context'
 import { installVscodeThemeFromMarketplace } from '@/themes/install'
@@ -337,6 +347,116 @@ function GlassRow({ children, label }: GlassRowProps) {
         {label}
       </span>
       {children}
+    </div>
+  )
+}
+
+function WallpaperSettingsPanel() {
+  const { t } = useI18n()
+  const settings = useStore($wallpaperSettings)
+
+  const handleChooseImage = async () => {
+    const paths = await window.hermesDesktop?.selectPaths?.({
+      title: t.settings.appearance.wallpaperChooseDialog,
+      filters: [{ name: 'Images', extensions: ['jpg', 'jpeg', 'png', 'webp', 'gif'] }]
+    })
+
+    if (paths && paths.length > 0) {
+      const sourcePath = paths[0]
+      const result = await window.hermesDesktop?.importWallpaper?.(sourcePath)
+
+      if (result && result.path) {
+        setWallpaperCustomPath(result.path)
+      } else {
+        // Fallback if IPC is unavailable
+        setWallpaperCustomPath(sourcePath)
+      }
+    }
+  }
+
+  return (
+    <div
+      className="mt-4 flex flex-col gap-4 border-t border-(--ui-stroke-secondary) pt-4"
+      data-translucency-peek-scope=""
+    >
+      <GlassRow label={t.settings.appearance.wallpaperImage}>
+        <div className="flex flex-col gap-2 w-full">
+          <SegmentedControl
+            onChange={id => {
+              triggerHaptic('selection')
+              setWallpaperMode(id as 'builtin' | 'custom')
+            }}
+            options={[
+              { id: 'builtin', label: t.settings.appearance.wallpaperHermes },
+              { id: 'custom', label: t.settings.appearance.wallpaperCustom }
+            ]}
+            value={settings.mode}
+          />
+          {settings.mode === 'custom' && (
+            <div className="flex flex-col gap-2 mt-1">
+              <div className="flex gap-2">
+                <Button onClick={handleChooseImage} size="inline" variant="secondary">
+                  {t.settings.appearance.wallpaperChoose}
+                </Button>
+                {settings.customPath && (
+                  <Button onClick={() => setWallpaperCustomPath(null)} size="inline" variant="text">
+                    {t.settings.appearance.wallpaperClear}
+                  </Button>
+                )}
+              </div>
+              {settings.customPath && (
+                <div
+                  className="text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary) truncate"
+                  title={settings.customPath}
+                >
+                  {settings.customPath.split(/[\\/]/).pop()}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </GlassRow>
+
+      <GlassRow label={t.settings.appearance.wallpaperOpacity}>
+        <TranslucencySlider label={t.settings.appearance.wallpaperOpacity} onChange={setWallpaperOpacity} value={settings.opacity} />
+      </GlassRow>
+
+      <GlassRow label={t.settings.appearance.wallpaperDim}>
+        <TranslucencySlider label={t.settings.appearance.wallpaperDimDesc} onChange={setWallpaperDim} value={settings.dim} />
+      </GlassRow>
+
+      <GlassRow label={t.settings.appearance.wallpaperBlur}>
+        <TranslucencySlider label={t.settings.appearance.wallpaperBlur} onChange={setWallpaperBlur} value={settings.blur} />
+      </GlassRow>
+
+      <GlassRow label={t.settings.appearance.wallpaperFit}>
+        <SegmentedControl
+          onChange={id => {
+            triggerHaptic('selection')
+            setWallpaperFit(id as 'cover' | 'contain')
+          }}
+          options={[
+            { id: 'cover', label: t.settings.appearance.wallpaperFill },
+            { id: 'contain', label: t.settings.appearance.wallpaperFitLabel }
+          ]}
+          value={settings.fit}
+        />
+      </GlassRow>
+
+      <GlassRow label={t.settings.appearance.wallpaperPosition}>
+        <SegmentedControl
+          onChange={id => {
+            triggerHaptic('selection')
+            setWallpaperPosition(id as 'top' | 'center' | 'bottom')
+          }}
+          options={[
+            { id: 'top', label: t.settings.appearance.wallpaperTop },
+            { id: 'center', label: t.settings.appearance.wallpaperCenter },
+            { id: 'bottom', label: t.settings.appearance.wallpaperBottom }
+          ]}
+          value={settings.position}
+        />
+      </GlassRow>
     </div>
   )
 }
@@ -706,6 +826,7 @@ export function AppearanceSettings() {
                 value={backdrop ? 'on' : 'off'}
               />
             }
+            below={backdrop ? <WallpaperSettingsPanel /> : undefined}
             description={a.backdropDesc}
             id={appearanceSettingElementId(APPEARANCE_SETTING_IDS.backdrop)}
             title={a.backdropTitle}
