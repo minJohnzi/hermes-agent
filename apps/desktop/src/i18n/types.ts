@@ -474,6 +474,23 @@ export interface Translations {
       }
       backdropTitle: string
       backdropDesc: string
+      wallpaperImage: string
+      wallpaperHermes: string
+      wallpaperCustom: string
+      wallpaperChoose: string
+      wallpaperChooseDialog: string
+      wallpaperClear: string
+      wallpaperOpacity: string
+      wallpaperDim: string
+      wallpaperDimDesc: string
+      wallpaperBlur: string
+      wallpaperFit: string
+      wallpaperFill: string
+      wallpaperFitLabel: string
+      wallpaperPosition: string
+      wallpaperTop: string
+      wallpaperCenter: string
+      wallpaperBottom: string
       introSplashTitle: string
       introSplashDesc: string
       reactionsTitle: string

@@ -222,6 +222,7 @@ declare global {
        *  back to readFileText and must reject a `truncated` result. */
       readPluginSource?: (filePath: string) => Promise<HermesReadFileTextResult>
       selectPaths: (options?: HermesSelectPathsOptions) => Promise<string[]>
+      importWallpaper?: (sourcePath: string) => Promise<{ path: string }>
       /** Native save dialog; returns the chosen path or null on cancel. */
       selectSavePath?: (options?: {
         defaultPath?: string
