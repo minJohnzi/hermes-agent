@@ -484,6 +484,10 @@ export const zh: Translations = {
           label: '额度提醒',
           description: '额度访问被暂停或恢复。'
         },
+        cron: {
+          label: '定时任务',
+          description: '定时任务执行成功或失败时的提醒。'
+        },
         plugin: {
           label: '插件通知',
           description: 'Hermes 在后台时，桌面插件发送了通知。'
@@ -2128,6 +2132,18 @@ export const zh: Translations = {
 
   cron: {
     close: '关闭定时任务',
+    notify: {
+      success: {
+        title: '定时任务已完成'
+      },
+      failure: {
+        title: '定时任务失败'
+      },
+      unnamed: '未命名任务',
+      action: {
+        view: '查看任务'
+      }
+    },
     title: '定时任务',
     count: count => `${count} 个任务`,
     modelImpact: {

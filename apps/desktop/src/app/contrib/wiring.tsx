@@ -18,6 +18,7 @@ import { resolveSessionProfile } from '@/app/session/hooks/use-session-actions/u
 import { formatRefValue } from '@/components/assistant-ui/directive-text'
 import { BootFailureOverlay } from '@/components/boot-failure-overlay'
 import { ConfirmHost } from '@/components/confirm-host'
+import { CronNotificationBridge } from '@/components/cron-notification-bridge'
 import { DesktopInstallOverlay } from '@/components/desktop-install-overlay'
 import { FindBar } from '@/components/find-bar'
 import { GatewayConnectingOverlay } from '@/components/gateway-connecting-overlay'
@@ -1290,6 +1291,7 @@ export function ContribWiring({ children }: { children: ReactNode }) {
       )}
 
       {/* Toasts above everything. */}
+      {!isAuxiliaryWindow() && <CronNotificationBridge />}
       <NotificationStack />
 
       {/* Backs confirm() from @/store/confirm — renders only while one is open. */}

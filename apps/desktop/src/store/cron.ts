@@ -92,3 +92,18 @@ export const setCronFocusJobId = (id: null | string) => $cronFocusJobId.set(id)
 // focus id here: the cron overlay's first fetch may not have loaded that row.
 export const $cronReviewRequest = atom(0)
 export const requestCronReview = () => $cronReviewRequest.set($cronReviewRequest.get() + 1)
+
+export function encodeCronNotifyId(jobId: string): string {
+  return `cron-focus:${encodeURIComponent(jobId)}`
+}
+
+export function decodeCronNotifyId(notifyId: string): string | null {
+  if (notifyId.startsWith('cron-focus:')) {
+    try {
+      return decodeURIComponent(notifyId.slice(11))
+    } catch {
+      return null
+    }
+  }
+  return null
+}

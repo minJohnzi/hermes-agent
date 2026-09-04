@@ -6,6 +6,7 @@ import { openSession } from '@/app/open-session'
 import { resolveDeepLinkAction } from '@/lib/deeplink-routes'
 import { pathFromHermesDeepLink, resolveHermesOpenPath } from '@/lib/hermes-open-target'
 import { storedSessionIdForNotification } from '@/lib/session-ids'
+import { decodeCronNotifyId, setCronFocusJobId } from '@/store/cron'
 import { requestMcpInstallFromDeepLink } from '@/store/mcp-deeplink-install'
 import { startMcpHealthChecker, stopMcpHealthChecker } from '@/store/mcp-health'
 import {
@@ -214,6 +215,13 @@ export function useDesktopIntegrations({
       if (payload.actionId) {
         invokePluginNotifyAction(payload.notifyId, payload.actionId)
       } else {
+        const cronJobId = payload.notifyId ? decodeCronNotifyId(payload.notifyId) : null
+        if (cronJobId) {
+          setCronFocusJobId(cronJobId)
+          navigate('/cron')
+          return
+        }
+        
         invokePluginNotifyActivate(payload.notifyId)
       }
 

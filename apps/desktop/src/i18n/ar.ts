@@ -392,6 +392,18 @@ export const ar = defineLocale({
         backgroundDone: {
           label: 'اكتملت مهمة الخلفية',
           description: 'اكتمل أمر طرفية يعمل في الخلفية.'
+        },
+        credits: {
+          label: 'تنبيهات الرصيد',
+          description: 'الوصول إلى الرصيد معلق أو تم استعادته.'
+        },
+        cron: {
+          label: 'المهام المجدولة',
+          description: 'مهمة مجدولة اكتملت أو فشلت.'
+        },
+        plugin: {
+          label: 'إشعارات الإضافات',
+          description: 'أرسلت إضافة سطح المكتب إشعارا بينما كان Hermes في الخلفية.'
         }
       },
       test: 'إرسال إشعار تجريبي',
@@ -769,9 +781,9 @@ export const ar = defineLocale({
       remoteUrlDesc: 'الرابط الأساسي لخلفية لوحة التحكم البعيدة. يمكن استخدام بادئات مسار مثل /hermes.',
       probing: 'جار فحص طريقة مصادقة هذه البوابة...',
       probeError: 'تعذر الوصول إلى هذه البوابة الآن. تحقق من الرابط وستظهر طريقة المصادقة عند الاستجابة.',
+
       signedIn: 'تم تسجيل الدخول',
       signIn: 'تسجيل الدخول',
-      signOut: 'تسجيل الخروج',
       signInWith: provider => `تسجيل الدخول عبر ${provider}`,
       authTitle: 'المصادقة',
       authSignedInPassword: 'هذه البوابة تستخدم اسم مستخدم وكلمة مرور. أنت مسجل الدخول والجلسة تتجدد تلقائياً.',
@@ -1514,6 +1526,20 @@ export const ar = defineLocale({
   },
   cron: {
     close: 'إغلاق',
+    notify: {
+      success: {
+        title: 'اكتملت المهمة المجدولة'
+      },
+      failure: {
+        title: 'فشلت المهمة المجدولة'
+      },
+      unnamed: 'مهمة غير مسماة',
+      action: {
+        view: 'عرض المهمة'
+      }
+    },
+    title: 'المهام المجدولة',
+    count: count => `${count} ${count === 1 ? 'مهمة' : 'مهام'}`,
     modelImpact: {
       title: 'تحتاج المهام المجدولة إلى المراجعة',
       message: count => `سيتم تخطي ${count} من المهام المجدولة حتى تراجع إعدادات النموذج الخاصة بها.`,

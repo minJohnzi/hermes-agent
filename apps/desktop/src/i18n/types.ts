@@ -412,7 +412,7 @@ export interface Translations {
       enableAllDesc: string
       focusedHint: string
       kinds: Record<
-        'approval' | 'backgroundDone' | 'credits' | 'input' | 'plugin' | 'turnDone' | 'turnError',
+        'approval' | 'backgroundDone' | 'credits' | 'cron' | 'input' | 'plugin' | 'turnDone' | 'turnError',
         { label: string; description: string }
       >
       test: string
@@ -1658,6 +1658,18 @@ export interface Translations {
 
   cron: {
     close: string
+    notify: {
+      success: {
+        title: string
+      }
+      failure: {
+        title: string
+      }
+      unnamed: string
+      action: {
+        view: string
+      }
+    }
     title: string
     count: (count: number) => string
     modelImpact: {

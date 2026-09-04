@@ -310,6 +310,10 @@ export const zhHant = defineLocale({
           label: '額度提醒',
           description: '額度存取被暫停或恢復。'
         },
+        cron: {
+          label: '排程',
+          description: '排程工作完成或失敗時的提醒。'
+        },
         plugin: {
           label: '外掛通知',
           description: 'Hermes 在背景時，桌面外掛傳送了通知。'
@@ -1594,7 +1598,19 @@ export const zhHant = defineLocale({
   },
 
   cron: {
-    close: '關閉排程',
+    close: '關閉排程工作',
+    notify: {
+      success: {
+        title: '排程工作已完成'
+      },
+      failure: {
+        title: '排程工作失敗'
+      },
+      unnamed: '未命名工作',
+      action: {
+        view: '檢視工作'
+      }
+    },
     title: '排程工作',
     count: count => `${count} 個工作`,
     modelImpact: {

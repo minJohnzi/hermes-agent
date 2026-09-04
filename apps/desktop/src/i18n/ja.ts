@@ -318,6 +318,10 @@ export const ja = defineLocale({
           label: 'クレジット通知',
           description: 'クレジットの利用が停止または復旧しました。'
         },
+        cron: {
+          label: 'Cron',
+          description: 'Cronジョブが完了したか、失敗しました。'
+        },
         plugin: {
           label: 'プラグイン通知',
           description: 'Hermes がバックグラウンドの間に、デスクトッププラグインが通知を送信しました。'
@@ -1656,6 +1660,18 @@ export const ja = defineLocale({
 
   cron: {
     close: 'Cron を閉じる',
+    notify: {
+      success: {
+        title: 'Cronジョブ完了'
+      },
+      failure: {
+        title: 'Cronジョブ失敗'
+      },
+      unnamed: '名前のないジョブ',
+      action: {
+        view: 'ジョブを表示'
+      }
+    },
     title: 'スケジュール済みジョブ',
     count: count => `${count} 件のジョブ`,
     modelImpact: {

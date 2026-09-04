@@ -497,6 +497,10 @@ export const en: Translations = {
           label: 'Credit alerts',
           description: 'Credit access is paused or restored.'
         },
+        cron: {
+          label: 'Scheduled jobs',
+          description: 'A cron job completed successfully or failed.'
+        },
         plugin: {
           label: 'Plugin notifications',
           description: 'A desktop plugin sent a notification while Hermes was in the background.'
@@ -1945,6 +1949,18 @@ export const en: Translations = {
 
   cron: {
     close: 'Close cron',
+    notify: {
+      success: {
+        title: 'Cron Job Completed'
+      },
+      failure: {
+        title: 'Cron Job Failed'
+      },
+      unnamed: 'Unnamed Cron Job',
+      action: {
+        view: 'View Cron Job'
+      }
+    },
     title: 'Scheduled jobs',
     count: count => `${count} ${count === 1 ? 'job' : 'jobs'}`,
     modelImpact: {
