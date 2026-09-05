@@ -18,26 +18,14 @@ export function CronNotificationBridge() {
   const connectionId = useStore($connection)?.connectionId ?? 'local'
   const scopeKey = `${connectionId}:${profile}`
 
-  return (
-    <CronNotificationBridgeImpl
-      connectionId={connectionId}
-      key={scopeKey}
-      profile={profile}
-    />
-  )
+  return <CronNotificationBridgeImpl connectionId={connectionId} key={scopeKey} profile={profile} />
 }
 
-function CronNotificationBridgeImpl({
-  connectionId,
-  profile
-}: {
-  connectionId: string
-  profile: string
-}) {
+function CronNotificationBridgeImpl({ connectionId, profile }: { connectionId: string; profile: string }) {
   const { t } = useI18n()
   const navigate = useNavigate()
   const jobs = useStore($cronJobs)
-  
+
   const baselineCache = useRef<Map<string, Baseline>>(new Map())
 
   // eslint-disable-next-line no-restricted-syntax
@@ -47,7 +35,7 @@ function CronNotificationBridgeImpl({
 
     for (const job of jobs) {
       const existing = baseline.get(job.id)
-      
+
       if (!existing) {
         // First time seeing this job in this scope. Add to baseline, no notification.
         newBaseline.set(job.id, { lastRunAt: job.last_run_at ?? null })
@@ -57,24 +45,25 @@ function CronNotificationBridgeImpl({
 
       // We already know about this job. Did its last_run_at change to a new timestamp?
       const newlyRun = job.last_run_at !== null && existing.lastRunAt !== job.last_run_at
-      
+
       if (newlyRun) {
         // Dispatch notification
         const status = job.last_status === 'ok' || (!job.last_status && !job.last_error) ? 'success' : 'failure'
 
-        const title = status === 'success' 
-          ? t.cron.notify.success.title
-          : t.cron.notify.failure.title
+        const title = status === 'success' ? t.cron.notify.success.title : t.cron.notify.failure.title
 
         const name = job.name || t.cron.notify.unnamed
-        const errorSummary = job.last_error ? job.last_error.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 180) : ''
+
+        const errorSummary = job.last_error
+          ? job.last_error.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 180)
+          : ''
 
         const notifyId = encodeCronNotifyId(job.id)
         const tag = `cron-run:${connectionId}:${profile}:${job.id}:${job.last_run_at}`
 
         // 1. Try foreground notification (NotificationStack)
         const isForeground = !document.hidden && (typeof document.hasFocus !== 'function' || document.hasFocus())
-        
+
         if (isForeground) {
           const actionText = t.cron.notify.action.view
 

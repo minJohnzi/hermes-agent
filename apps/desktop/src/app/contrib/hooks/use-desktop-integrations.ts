@@ -238,12 +238,14 @@ export function useDesktopIntegrations({
         invokePluginNotifyAction(payload.notifyId, payload.actionId)
       } else {
         const cronJobId = payload.notifyId ? decodeCronNotifyId(payload.notifyId) : null
+
         if (cronJobId) {
           setCronFocusJobId(cronJobId)
           navigate('/cron')
+
           return
         }
-        
+
         invokePluginNotifyActivate(payload.notifyId)
       }
 

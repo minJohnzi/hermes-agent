@@ -105,5 +105,6 @@ export function decodeCronNotifyId(notifyId: string): string | null {
       return null
     }
   }
+
   return null
 }

@@ -68,60 +68,76 @@ describe('CronNotificationBridge', () => {
 
   it('notifies when known job goes from null to timestamp', () => {
     const job = { id: 'j1', last_run_at: null, last_status: 'ok', name: 'Job A' } as CronJob
-    act(() => { setCronJobs([job]) })
+    act(() => {
+      setCronJobs([job])
+    })
     const { rerender } = renderBridge()
-    
+
     expect(notify).not.toHaveBeenCalled()
-    
-    act(() => { setCronJobs([{ ...job, last_run_at: 't2' }]) })
+
+    act(() => {
+      setCronJobs([{ ...job, last_run_at: 't2' }])
+    })
     rerender(<CronNotificationBridge />)
     expect(notify).toHaveBeenCalledTimes(1)
   })
 
   it('does not notify when timestamp is unchanged', () => {
     const job = { id: 'j1', last_run_at: 't1', last_status: 'ok', name: 'Job A' } as CronJob
-    act(() => { setCronJobs([job]) })
+    act(() => {
+      setCronJobs([job])
+    })
     const { rerender } = renderBridge()
-    
-    act(() => { setCronJobs([{ ...job, name: 'Changed Name' }]) })
+
+    act(() => {
+      setCronJobs([{ ...job, name: 'Changed Name' }])
+    })
     rerender(<CronNotificationBridge />)
-    
+
     expect(notify).not.toHaveBeenCalled()
   })
 
   it('does not notify when a completely new job is added', () => {
     const { rerender } = renderBridge()
-    
+
     act(() => {
       setCronJobs([{ id: 'j1', last_run_at: 't1', last_status: 'ok', name: 'Job A' } as CronJob])
     })
     rerender(<CronNotificationBridge />)
-    
+
     expect(notify).not.toHaveBeenCalled()
   })
 
   it('notifies when last_run_at changes', () => {
     const job = { id: 'j1', last_run_at: 't1', last_status: 'ok', name: 'Job A' } as CronJob
-    act(() => { setCronJobs([job]) })
+    act(() => {
+      setCronJobs([job])
+    })
     const { rerender } = renderBridge()
-    
+
     expect(notify).not.toHaveBeenCalled()
-    
-    act(() => { setCronJobs([{ ...job, last_run_at: 't2' }]) })
+
+    act(() => {
+      setCronJobs([{ ...job, last_run_at: 't2' }])
+    })
     rerender(<CronNotificationBridge />)
     expect(notify).toHaveBeenCalledTimes(1)
   })
 
   it('uses native notification when backgrounded', () => {
     const job = { id: 'j1', last_run_at: 't1', last_status: 'ok', name: 'Job A' } as CronJob
-    act(() => { setCronJobs([job]) })
+    act(() => {
+      setCronJobs([job])
+    })
     const { rerender } = renderBridge()
-    
+
     setWindowState(false, true)
-    
-    act(() => { setCronJobs([{ ...job, last_run_at: 't2' }]) })
+
+    act(() => {
+      setCronJobs([{ ...job, last_run_at: 't2' }])
+    })
     rerender(<CronNotificationBridge />)
-    
+
     expect(notify).not.toHaveBeenCalled()
     expect(dispatchNativeNotification).toHaveBeenCalledTimes(1)
     expect(dispatchNativeNotification).toHaveBeenCalledWith(
@@ -134,12 +150,16 @@ describe('CronNotificationBridge', () => {
 
   it('differentiates success and failure based on last_status', () => {
     const job = { id: 'j1', last_run_at: 't1', last_status: 'ok', name: 'Job B' } as CronJob
-    act(() => { setCronJobs([job]) })
+    act(() => {
+      setCronJobs([job])
+    })
     const { rerender } = renderBridge()
-    
-    act(() => { setCronJobs([{ ...job, last_error: 'Some error occurred', last_run_at: 't2', last_status: 'error' }]) })
+
+    act(() => {
+      setCronJobs([{ ...job, last_error: 'Some error occurred', last_run_at: 't2', last_status: 'error' }])
+    })
     rerender(<CronNotificationBridge />)
-    
+
     expect(notify).toHaveBeenCalledTimes(1)
     expect(notify).toHaveBeenCalledWith({
       action: expect.objectContaining({ label: 'View Cron Job' }),
@@ -153,68 +173,82 @@ describe('CronNotificationBridge', () => {
 
   it('maps missing last_status with last_error to failure', () => {
     const job = { id: 'j1', last_error: 'Fallback err', last_run_at: 't1', name: 'Job B' } as CronJob
-    act(() => { setCronJobs([job]) })
+    act(() => {
+      setCronJobs([job])
+    })
     const { rerender } = renderBridge()
-    
-    act(() => { setCronJobs([{ ...job, last_run_at: 't2' }]) })
+
+    act(() => {
+      setCronJobs([{ ...job, last_run_at: 't2' }])
+    })
     rerender(<CronNotificationBridge />)
-    
+
     expect(notify).toHaveBeenCalledWith(expect.objectContaining({ kind: 'error' }))
   })
 
   it('maps missing last_status and last_error to success', () => {
     const job = { id: 'j1', last_run_at: 't1', name: 'Job B' } as CronJob
-    act(() => { setCronJobs([job]) })
+    act(() => {
+      setCronJobs([job])
+    })
     const { rerender } = renderBridge()
-    
-    act(() => { setCronJobs([{ ...job, last_run_at: 't2' }]) })
+
+    act(() => {
+      setCronJobs([{ ...job, last_run_at: 't2' }])
+    })
     rerender(<CronNotificationBridge />)
-    
+
     expect(notify).toHaveBeenCalledWith(expect.objectContaining({ kind: 'success' }))
   })
 
   it('re-establishes baseline after profile change', () => {
     const job = { id: 'j1', last_run_at: 't1', last_status: 'ok', name: 'Job A' } as CronJob
-    act(() => { setCronJobs([job]) })
+    act(() => {
+      setCronJobs([job])
+    })
     const { rerender } = renderBridge()
     // Change profile and jobs simultaneously (simulating connection switch receiving new state)
-    act(() => { 
-      $activeProfile.set('remote') 
+    act(() => {
+      $activeProfile.set('remote')
       setCronJobs([{ ...job, last_run_at: 't2' }])
     })
     rerender(<CronNotificationBridge />)
-    
+
     expect(notify).not.toHaveBeenCalled()
   })
 
   it('re-establishes baseline after connection change', () => {
     const job = { id: 'j1', last_run_at: 't1', last_status: 'ok', name: 'Job A' } as CronJob
-    act(() => { setCronJobs([job]) })
+    act(() => {
+      setCronJobs([job])
+    })
     const { rerender } = renderBridge()
-    
-    act(() => { 
-      $connection.set({ connectionId: 'vps' } as never) 
+
+    act(() => {
+      $connection.set({ connectionId: 'vps' } as never)
       setCronJobs([{ ...job, last_run_at: 't2' }])
     })
     rerender(<CronNotificationBridge />)
-    
+
     expect(notify).not.toHaveBeenCalled()
   })
 
   it('notifies for multiple jobs simultaneously', () => {
     const jobA = { id: 'j1', last_run_at: 't1', last_status: 'ok', name: 'A' } as CronJob
     const jobB = { id: 'j2', last_run_at: 't1', last_status: 'ok', name: 'B' } as CronJob
-    act(() => { setCronJobs([jobA, jobB]) })
+    act(() => {
+      setCronJobs([jobA, jobB])
+    })
     const { rerender } = renderBridge()
-    
-    act(() => { 
+
+    act(() => {
       setCronJobs([
         { ...jobA, last_run_at: 't2' },
         { ...jobB, last_run_at: 't2' }
       ])
     })
     rerender(<CronNotificationBridge />)
-    
+
     expect(notify).toHaveBeenCalledTimes(2)
   })
 })
