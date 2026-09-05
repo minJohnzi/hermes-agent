@@ -10,6 +10,10 @@
   font-size: var(--titlebar-icon-size);
 }
 
+/* v4 gates hover: on @media (hover: hover). Some Windows hosts with a
+   digitizer answer false even with a mouse, so hover-reveal controls stay
+   opacity-0 (clickable, invisible). Trust :hover itself. */
+@custom-variant hover (&:hover);
 @custom-variant dark (&:is(.dark *));
 
 /* Blanket reduced-motion override: kill ALL CSS animations and transitions
@@ -18,7 +22,6 @@
    everything else so overlays and loading bars resolve instantly instead of
    being caught mid-fade by a screenshot. */
 @media (prefers-reduced-motion: reduce) {
-
   *,
   *::before,
   *::after {
@@ -32,17 +35,23 @@
 /* Continuous decorative animations otherwise keep Chromium's renderer awake
    behind another app. main.tsx owns this attribute only for the primary
    window; wake/pet overlays retain their purpose-built visibility behavior. */
-:root[data-renderer-animations-paused] :is(.shimmer,
-  .quest-glow,
-  .pet-egg,
-  .pet-egg__glow,
-  .pet-egg-shadow,
-  .pet-wobble,
-  .progress-slide,
-  .kanban-arc,
-  .glyph-spinner__strip),
+:root[data-renderer-animations-paused]
+  :is(
+    .shimmer,
+    .quest-glow,
+    .pet-egg,
+    .pet-egg__glow,
+    .pet-egg-shadow,
+    .pet-wobble,
+    .progress-slide,
+    .kanban-arc,
+    .glyph-spinner__strip
+  ),
 :root[data-renderer-animations-paused] .arc-border::before,
-:root[data-renderer-animations-paused] [data-slot='aui_assistant-message-content'] .aui-md [data-slot='code-card'][data-streaming='true'] {
+:root[data-renderer-animations-paused]
+  [data-slot='aui_assistant-message-content']
+  .aui-md
+  [data-slot='code-card'][data-streaming='true'] {
   animation-play-state: paused !important;
 }
 
@@ -67,7 +76,6 @@
   font-display: swap;
   src: url('./fonts/JetBrainsMono-Regular.woff2') format('woff2');
 }
-
 @font-face {
   font-family: 'JetBrains Mono';
   font-style: normal;
@@ -75,7 +83,6 @@
   font-display: swap;
   src: url('./fonts/JetBrainsMono-Bold.woff2') format('woff2');
 }
-
 @font-face {
   font-family: 'JetBrains Mono';
   font-style: italic;
@@ -254,49 +261,73 @@
     --z-onboarding-popover: 1310;
     --z-setup: 1400;
     --z-crash: 1500;
-    --ui-bg-chrome: color-mix(in srgb,
-        var(--theme-background-seed) var(--theme-mix-chrome),
-        var(--theme-neutral-chrome));
-    --ui-bg-sidebar: color-mix(in srgb,
-        var(--theme-sidebar-seed) var(--theme-mix-sidebar),
-        var(--theme-neutral-sidebar));
+    --ui-bg-chrome: color-mix(
+      in srgb,
+      var(--theme-background-seed) var(--theme-mix-chrome),
+      var(--theme-neutral-chrome)
+    );
+    --ui-bg-sidebar: color-mix(
+      in srgb,
+      var(--theme-sidebar-seed) var(--theme-mix-sidebar),
+      var(--theme-neutral-sidebar)
+    );
     --ui-bg-editor: color-mix(in srgb, var(--theme-card-seed) var(--theme-mix-card), var(--theme-neutral-card));
-    --ui-bg-elevated: color-mix(in srgb,
-        var(--theme-elevated-seed) var(--theme-mix-elevated),
-        var(--theme-neutral-card));
+    --ui-bg-elevated: color-mix(
+      in srgb,
+      var(--theme-elevated-seed) var(--theme-mix-elevated),
+      var(--theme-neutral-card)
+    );
     --ui-bg-card: color-mix(in srgb, var(--ui-accent) 4%, color-mix(in srgb, var(--ui-base) 4%, transparent));
     --ui-bg-input: #fcfcfc;
-    --ui-bg-primary: color-mix(in srgb,
-        var(--ui-accent) var(--theme-fill-primary-accent-mix),
-        color-mix(in srgb, var(--ui-base) 10%, transparent));
-    --ui-bg-secondary: color-mix(in srgb,
-        var(--ui-accent) var(--theme-fill-secondary-accent-mix),
-        color-mix(in srgb, var(--ui-base) 7%, transparent));
-    --ui-bg-tertiary: color-mix(in srgb,
-        var(--ui-accent) var(--theme-fill-tertiary-accent-mix),
-        color-mix(in srgb, var(--ui-base) 5%, transparent));
-    --ui-bg-quaternary: color-mix(in srgb,
-        var(--ui-accent) var(--theme-fill-quaternary-accent-mix),
-        color-mix(in srgb, var(--ui-base) 4%, transparent));
-    --ui-bg-quinary: color-mix(in srgb,
-        var(--ui-accent) var(--theme-fill-quinary-accent-mix),
-        color-mix(in srgb, var(--ui-base) 3%, transparent));
-    --ui-row-hover-background: color-mix(in srgb,
-        var(--ui-accent) var(--theme-row-hover-accent-mix),
-        color-mix(in srgb, var(--ui-base) 3%, transparent));
-    --ui-row-active-background: color-mix(in srgb,
-        var(--ui-accent) var(--theme-row-active-accent-mix),
-        color-mix(in srgb, var(--ui-base) 5%, transparent));
+    --ui-bg-primary: color-mix(
+      in srgb,
+      var(--ui-accent) var(--theme-fill-primary-accent-mix),
+      color-mix(in srgb, var(--ui-base) 10%, transparent)
+    );
+    --ui-bg-secondary: color-mix(
+      in srgb,
+      var(--ui-accent) var(--theme-fill-secondary-accent-mix),
+      color-mix(in srgb, var(--ui-base) 7%, transparent)
+    );
+    --ui-bg-tertiary: color-mix(
+      in srgb,
+      var(--ui-accent) var(--theme-fill-tertiary-accent-mix),
+      color-mix(in srgb, var(--ui-base) 5%, transparent)
+    );
+    --ui-bg-quaternary: color-mix(
+      in srgb,
+      var(--ui-accent) var(--theme-fill-quaternary-accent-mix),
+      color-mix(in srgb, var(--ui-base) 4%, transparent)
+    );
+    --ui-bg-quinary: color-mix(
+      in srgb,
+      var(--ui-accent) var(--theme-fill-quinary-accent-mix),
+      color-mix(in srgb, var(--ui-base) 3%, transparent)
+    );
+    --ui-row-hover-background: color-mix(
+      in srgb,
+      var(--ui-accent) var(--theme-row-hover-accent-mix),
+      color-mix(in srgb, var(--ui-base) 3%, transparent)
+    );
+    --ui-row-active-background: color-mix(
+      in srgb,
+      var(--ui-accent) var(--theme-row-active-accent-mix),
+      color-mix(in srgb, var(--ui-base) 5%, transparent)
+    );
     /* Open in a pane, but not the FOCUSED one: the active band at reduced
        strength, so every session on screen is marked and the one you're in
        still wins. Mixed from the active token so a theme tunes both at once. */
     --ui-row-open-background: color-mix(in srgb, var(--ui-row-active-background) 28%, transparent);
-    --ui-control-hover-background: color-mix(in srgb,
-        var(--ui-accent) var(--theme-control-hover-accent-mix),
-        color-mix(in srgb, var(--ui-base) 4%, transparent));
-    --ui-control-active-background: color-mix(in srgb,
-        var(--ui-accent) var(--theme-control-active-accent-mix),
-        color-mix(in srgb, var(--ui-base) 5%, transparent));
+    --ui-control-hover-background: color-mix(
+      in srgb,
+      var(--ui-accent) var(--theme-control-hover-accent-mix),
+      color-mix(in srgb, var(--ui-base) 4%, transparent)
+    );
+    --ui-control-active-background: color-mix(
+      in srgb,
+      var(--ui-accent) var(--theme-control-active-accent-mix),
+      color-mix(in srgb, var(--ui-base) 5%, transparent)
+    );
     --ui-text-primary: color-mix(in srgb, var(--ui-base) 94%, transparent);
     --ui-text-secondary: color-mix(in srgb, var(--ui-base) 74%, transparent);
     --ui-text-tertiary: color-mix(in srgb, var(--ui-base) 54%, transparent);
@@ -308,18 +339,26 @@
        reading column stays primary. */
     --conversation-scaffold-text: color-mix(in srgb, var(--ui-base) 64%, transparent);
     --conversation-scaffold-meta: color-mix(in srgb, var(--ui-base) 44%, transparent);
-    --ui-stroke-primary: color-mix(in srgb,
-        var(--ui-accent) var(--theme-stroke-primary-accent-mix),
-        color-mix(in srgb, var(--ui-base) 10%, transparent));
-    --ui-stroke-secondary: color-mix(in srgb,
-        var(--ui-accent) var(--theme-stroke-secondary-accent-mix),
-        color-mix(in srgb, var(--ui-base) 7%, transparent));
-    --ui-stroke-tertiary: color-mix(in srgb,
-        var(--ui-accent) var(--theme-stroke-tertiary-accent-mix),
-        color-mix(in srgb, var(--ui-base) 5%, transparent));
-    --ui-stroke-quaternary: color-mix(in srgb,
-        var(--ui-accent) var(--theme-stroke-quaternary-accent-mix),
-        color-mix(in srgb, var(--ui-base) 3%, transparent));
+    --ui-stroke-primary: color-mix(
+      in srgb,
+      var(--ui-accent) var(--theme-stroke-primary-accent-mix),
+      color-mix(in srgb, var(--ui-base) 10%, transparent)
+    );
+    --ui-stroke-secondary: color-mix(
+      in srgb,
+      var(--ui-accent) var(--theme-stroke-secondary-accent-mix),
+      color-mix(in srgb, var(--ui-base) 7%, transparent)
+    );
+    --ui-stroke-tertiary: color-mix(
+      in srgb,
+      var(--ui-accent) var(--theme-stroke-tertiary-accent-mix),
+      color-mix(in srgb, var(--ui-base) 5%, transparent)
+    );
+    --ui-stroke-quaternary: color-mix(
+      in srgb,
+      var(--ui-accent) var(--theme-stroke-quaternary-accent-mix),
+      color-mix(in srgb, var(--ui-base) 3%, transparent)
+    );
     --ui-sash-hover-border: color-mix(in srgb, var(--ui-accent) 18%, var(--ui-stroke-tertiary));
     --ui-sash-hover-background: color-mix(in srgb, var(--ui-accent) 6%, transparent);
     --ui-surface-background: var(--ui-bg-editor);
@@ -336,9 +375,11 @@
        mode, nudged down in dark so a widget settles into the transcript
        instead of glowing above it (see the `.dark` override). */
     --ui-widget-surface-background: var(--ui-bg-editor);
-    --ui-chat-bubble-background: color-mix(in srgb,
-        var(--theme-bubble-seed) var(--theme-mix-bubble),
-        var(--theme-neutral-card));
+    --ui-chat-bubble-background: color-mix(
+      in srgb,
+      var(--theme-bubble-seed) var(--theme-mix-bubble),
+      var(--theme-neutral-card)
+    );
     --ui-chat-bubble-opaque-background: var(--ui-bg-editor);
     --ui-inline-code-background: color-mix(in srgb, #141414 5%, transparent);
     --ui-inline-code-foreground: color-mix(in srgb, #141414 88%, transparent);
@@ -354,6 +395,11 @@
     --dt-popover-foreground: var(--ui-text-primary);
     --dt-primary: var(--theme-primary);
     --dt-primary-foreground: #fcfcfc;
+    /* Boot-paint fallbacks. themes/context.tsx replaces --dt-primary-solid with
+       the hue deepened until #fcfcfc clears AA on it; until it runs, the raw
+       primary is the closest honest guess. */
+    --dt-primary-solid: var(--theme-primary);
+    --dt-primary-solid-foreground: #fcfcfc;
     --dt-secondary: var(--theme-secondary);
     --dt-secondary-foreground: var(--ui-text-secondary);
     --dt-accent: var(--theme-accent-soft);
@@ -386,7 +432,12 @@
     --dt-destructive-foreground: #ffffff;
     --dt-sidebar-bg: var(--ui-bg-sidebar);
     --dt-sidebar-border: var(--ui-stroke-secondary);
-    --dt-user-bubble: var(--ui-chat-bubble-background);
+    /* `--user-bubble-keep` is the Settings → Appearance → Message Bubble lever
+       (store/user-bubble-transparency.ts): the share of the theme's bubble
+       fill to keep. Unset at the default, so the mix is a no-op and the bubble
+       is the theme's fill exactly as before. The border stays put either way —
+       at full transparency the outline is what still marks your turn. */
+    --dt-user-bubble: color-mix(in srgb, var(--ui-chat-bubble-background) var(--user-bubble-keep, 100%), transparent);
     --dt-user-bubble-border: var(--ui-stroke-tertiary);
 
     --dt-font-sans:
@@ -460,8 +511,10 @@
     --composer-fallback-height: 2.75rem;
     --composer-measured-height: calc(0.5rem + var(--composer-shell-pad-block-end) + var(--composer-fallback-height));
     --composer-surface-measured-height: var(--composer-fallback-height);
-    --thread-viewport-height: max(0rem,
-        calc(100% - var(--composer-measured-height) + var(--composer-surface-measured-height)));
+    --thread-viewport-height: max(
+      0rem,
+      calc(100% - var(--composer-measured-height) + var(--composer-surface-measured-height))
+    );
     --vsq: min(0.5vh, 0.5vw);
     --image-preview-max-width: 34rem;
     --image-preview-height: clamp(16.25rem, calc(var(--vsq) * 100), 26.25rem);
@@ -569,6 +622,16 @@
     background: color-mix(in srgb, var(--ui-bg-chrome) var(--translucency-glass-keep, 100%), transparent);
   }
 
+  /* A surface that FADES INTO the field (a pane tab's hover ✕ runway) declares
+     `data-glass-field` and reads `--glass-field` for its endpoint. Under glass
+     the surface tokens are transparent, so a fade aimed at one goes
+     transparent→transparent and the runway vanishes; the field is the <body>
+     mix above, so that is what a fade must land on. Inert with glass off:
+     the caller's own fallback (its surface token) applies. */
+  :root[data-hermes-glass] [data-glass-field] {
+    --glass-field: color-mix(in srgb, var(--ui-bg-chrome) var(--translucency-glass-keep, 100%), transparent);
+  }
+
   /* Sidebar scope (the Finder shape): glass rail, opaque content column.
      <body> stays the one painter but splits at the rail's visual edge — the
      store publishes it as --glass-rail-edge (live-tracked through collapse
@@ -578,15 +641,21 @@
      column's own surfaces stay transparent (they'd double-paint the tint
      otherwise) — the body backdrop alone restores the opaque look. */
   :root[data-hermes-glass][data-hermes-glass-scope='sidebar'] body {
-    background: linear-gradient(to right,
-        color-mix(in srgb, var(--ui-bg-chrome) var(--translucency-glass-keep, 100%), transparent) var(--glass-rail-edge, 0px),
-        var(--ui-bg-chrome) var(--glass-rail-edge, 0px));
+    background: linear-gradient(
+      to right,
+      color-mix(in srgb, var(--ui-bg-chrome) var(--translucency-glass-keep, 100%), transparent)
+        var(--glass-rail-edge, 0px),
+      var(--ui-bg-chrome) var(--glass-rail-edge, 0px)
+    );
   }
 
   :root[data-hermes-glass][data-hermes-glass-scope='sidebar'][dir='rtl'] body {
-    background: linear-gradient(to left,
-        color-mix(in srgb, var(--ui-bg-chrome) var(--translucency-glass-keep, 100%), transparent) var(--glass-rail-edge, 0px),
-        var(--ui-bg-chrome) var(--glass-rail-edge, 0px));
+    background: linear-gradient(
+      to left,
+      color-mix(in srgb, var(--ui-bg-chrome) var(--translucency-glass-keep, 100%), transparent)
+        var(--glass-rail-edge, 0px),
+      var(--ui-bg-chrome) var(--glass-rail-edge, 0px)
+    );
   }
 
   /* The app shell's two full-window opaque painters (the contrib controller
@@ -617,12 +686,16 @@
      wear the sidebar token, so both come back as almost-solid fills and the
      two-tone layout survives. */
   :root[data-hermes-glass] [data-glass-raised] {
-    --ui-chat-surface-background: color-mix(in srgb,
-        var(--ui-bg-chrome) max(94%, var(--translucency-glass-keep, 100%)),
-        transparent);
-    --ui-sidebar-surface-background: color-mix(in srgb,
-        var(--ui-bg-sidebar) max(94%, var(--translucency-glass-keep, 100%)),
-        transparent);
+    --ui-chat-surface-background: color-mix(
+      in srgb,
+      var(--ui-bg-chrome) max(94%, var(--translucency-glass-keep, 100%)),
+      transparent
+    );
+    --ui-sidebar-surface-background: color-mix(
+      in srgb,
+      var(--ui-bg-sidebar) max(94%, var(--translucency-glass-keep, 100%)),
+      transparent
+    );
     --ui-editor-surface-background: var(--ui-bg-chrome);
   }
 
@@ -701,13 +774,15 @@
     font: inherit;
   }
 
-  :where(a,
+  :where(
+    a,
     .underline,
     [class~='hover:underline'],
     [class~='focus:underline'],
     [class~='focus-visible:underline'],
     [class~='group-hover:underline'],
-    [class~='peer-hover:underline']) {
+    [class~='peer-hover:underline']
+  ) {
     text-decoration-color: color-mix(in srgb, currentColor 20%, transparent);
     text-underline-offset: 0.25rem;
   }
@@ -809,19 +884,19 @@
    text-node label still matches `:only-child` — which is exactly how every
    chip lost its spacer. Icon-only users take the hue via `[data-ref]` instead
    of this class. */
-.ref> :where(svg, i.codicon) {
+.ref > :where(svg, i.codicon) {
   margin-inline-end: 0.25em;
   opacity: 0.8;
 }
 
-.ref>svg {
+.ref > svg {
   display: inline-block;
   width: 0.875em;
   height: 0.875em;
   vertical-align: -0.1em;
 }
 
-.ref>i.codicon {
+.ref > i.codicon {
   font-size: 0.875em;
 }
 
@@ -841,8 +916,12 @@
   pointer-events: none;
 }
 
-[data-pane-shell]:has([data-pane-side='left'] [data-suppress-pane-reveal-side]:hover) [data-pane-side='left'] [data-pane-reveal-trigger],
-[data-pane-shell]:has([data-pane-side='right'] [data-suppress-pane-reveal-side]:hover) [data-pane-side='right'] [data-pane-reveal-trigger] {
+[data-pane-shell]:has([data-pane-side='left'] [data-suppress-pane-reveal-side]:hover)
+  [data-pane-side='left']
+  [data-pane-reveal-trigger],
+[data-pane-shell]:has([data-pane-side='right'] [data-suppress-pane-reveal-side]:hover)
+  [data-pane-side='right']
+  [data-pane-reveal-trigger] {
   pointer-events: none;
 }
 
@@ -901,7 +980,6 @@
    utilities (cursor-grab, cursor-default, disabled:cursor-*) still win since
    they live in the utilities layer. */
 @layer base {
-
   button:not(:disabled):not([aria-disabled='true']),
   summary,
   [role='button']:not([aria-disabled='true']),
@@ -916,7 +994,6 @@
 }
 
 @layer utilities {
-
   [class*='rounded-full'],
   [class*=':rounded-full'] {
     border-radius: calc(var(--radius-scalar) * 9999rem);
@@ -939,7 +1016,6 @@
 }
 
 @keyframes arc-border {
-
   /* Compositor-only travel. The ::before layer is 300% × 300% of the host
      (mirroring the old `background-size: 300%`), so translating it from
      -10% → -50% of its own size reproduces the old
@@ -951,7 +1027,6 @@
   0% {
     transform: translate(-10%, -10%);
   }
-
   100% {
     transform: translate(-50%, -50%);
   }
@@ -991,10 +1066,12 @@
 /* Landed `memory` tool row — gold → purple on the brain glyph + title.
    Pair with `text-transparent` so the scaffold label color can't win. */
 .tool-memory-legendary-title {
-  background-image: linear-gradient(105deg,
-      var(--tool-memory-legendary-from) 0%,
-      var(--tool-memory-legendary-mid) 48%,
-      var(--tool-memory-legendary-to) 100%);
+  background-image: linear-gradient(
+    105deg,
+    var(--tool-memory-legendary-from) 0%,
+    var(--tool-memory-legendary-mid) 48%,
+    var(--tool-memory-legendary-to) 100%
+  );
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent !important;
@@ -1014,7 +1091,6 @@
   0% {
     background-color: color-mix(in srgb, var(--dt-primary, #f59e0b) 22%, transparent);
   }
-
   100% {
     background-color: transparent;
   }
@@ -1041,20 +1117,22 @@
      style/paint work — while the host's mask + overflow clip it to the ring. */
   width: 300%;
   height: 300%;
-  background: linear-gradient(var(--arc-angle),
-      transparent 0%,
-      var(--arc-c0) 15%,
-      var(--arc-c1) 20%,
-      var(--arc-c2) 25%,
-      transparent 35%,
-      transparent 40%,
-      var(--arc-c0) 55%,
-      var(--arc-c1) 60%,
-      var(--arc-c2) 65%,
-      transparent 75%,
-      transparent 80%,
-      var(--arc-c0) 95%,
-      var(--arc-c1) 100%);
+  background: linear-gradient(
+    var(--arc-angle),
+    transparent 0%,
+    var(--arc-c0) 15%,
+    var(--arc-c1) 20%,
+    var(--arc-c2) 25%,
+    transparent 35%,
+    transparent 40%,
+    var(--arc-c0) 55%,
+    var(--arc-c1) 60%,
+    var(--arc-c2) 65%,
+    transparent 75%,
+    transparent 80%,
+    var(--arc-c0) 95%,
+    var(--arc-c1) 100%
+  );
   will-change: transform;
   animation: arc-border var(--arc-duration) linear infinite;
 }
@@ -1325,7 +1403,7 @@ body.guest-pointer-lock :is(webview, iframe) {
     text-overflow: clip;
   }
 
-  .hover-marquee[data-marquee='true']>.hover-marquee-inner {
+  .hover-marquee[data-marquee='true'] > .hover-marquee-inner {
     display: inline-block;
     animation: hover-marquee var(--marquee-t, 3s) linear infinite;
   }
@@ -1333,7 +1411,6 @@ body.guest-pointer-lock :is(webview, iframe) {
   /* One direction, Spotify-style: scroll the tail in, hold, snap back, hold.
      The percentages pin the two holds; the travel occupies the middle. */
   @keyframes hover-marquee {
-
     0%,
     10% {
       transform: translateX(0);
@@ -1375,7 +1452,6 @@ body.guest-pointer-lock :is(webview, iframe) {
   }
 
   @supports not selector(::-webkit-scrollbar) {
-
     .scrollbar-dt,
     .scrollbar-dt *:not(.scrollbar-overlay) {
       scrollbar-width: thin;
@@ -1443,8 +1519,8 @@ body.guest-pointer-lock :is(webview, iframe) {
    (tool / paragraph) already provides the separation. Reach one level deep too:
    Streamdown wraps blocks in a `div.space-y-*`, so the real first line is the
    first child's first child. */
-[data-slot='aui_assistant-message-content'] .aui-md> :first-child,
-[data-slot='aui_assistant-message-content'] .aui-md> :first-child> :first-child {
+[data-slot='aui_assistant-message-content'] .aui-md > :first-child,
+[data-slot='aui_assistant-message-content'] .aui-md > :first-child > :first-child {
   margin-top: 0;
 }
 
@@ -1540,7 +1616,7 @@ body.guest-pointer-lock :is(webview, iframe) {
   text-align: center;
 }
 
-[data-slot='aui_intro']>div {
+[data-slot='aui_intro'] > div {
   max-width: var(--composer-width);
 }
 
@@ -1560,11 +1636,24 @@ body.guest-pointer-lock :is(webview, iframe) {
   container-type: inline-size;
 }
 
-.fit-text>[aria-hidden] {
+/* The display lettering an empty chat is titled with. Kept here beside
+   `.fit-text` rather than as utilities on the element: the two always travel
+   together, and the face is the whole point of the treatment — it must not be
+   something a class-merge or a missed scan can quietly drop, leaving the
+   wordmark rendered in body text. */
+.wordmark {
+  font-family: 'Collapse', var(--font-sans);
+  font-weight: 700;
+  line-height: 0.9;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.fit-text > [aria-hidden] {
   visibility: hidden;
 }
 
-.fit-text> :not([aria-hidden]) {
+.fit-text > :not([aria-hidden]) {
   flex-grow: 1;
   container-type: inline-size;
 
@@ -1572,20 +1661,22 @@ body.guest-pointer-lock :is(webview, iframe) {
   --fit-available-space: var(--fit-captured-length);
 }
 
-.fit-text> :not([aria-hidden])>* {
+.fit-text > :not([aria-hidden]) > * {
   --fit-support-sentinel: inherit;
   --fit-captured-length: 100cqi;
   --fit-ratio: tan(atan2(var(--fit-available-space), var(--fit-available-space) - var(--fit-captured-length)));
 
   display: block;
   inline-size: var(--fit-available-space);
-  font-size: clamp(var(--fit-min, 1em),
-      1em * var(--fit-ratio),
-      var(--fit-max, infinity * 1px) - var(--fit-support-sentinel));
+  font-size: clamp(
+    var(--fit-min, 1em),
+    1em * var(--fit-ratio),
+    var(--fit-max, infinity * 1px) - var(--fit-support-sentinel)
+  );
 }
 
 @container (inline-size > 0) {
-  .fit-text> :not([aria-hidden])>* {
+  .fit-text > :not([aria-hidden]) > * {
     white-space: nowrap;
   }
 }
@@ -1662,11 +1753,13 @@ body.guest-pointer-lock :is(webview, iframe) {
   border-radius: 0.4rem;
   opacity: 0;
   transition: opacity 150ms ease;
-  background-image: repeating-linear-gradient(-45deg,
-      color-mix(in srgb, var(--ui-text-tertiary) 38%, transparent) 0,
-      color-mix(in srgb, var(--ui-text-tertiary) 38%, transparent) 1px,
-      transparent 1px,
-      transparent 3.5px);
+  background-image: repeating-linear-gradient(
+    -45deg,
+    color-mix(in srgb, var(--ui-text-tertiary) 38%, transparent) 0,
+    color-mix(in srgb, var(--ui-text-tertiary) 38%, transparent) 1px,
+    transparent 1px,
+    transparent 3.5px
+  );
 }
 
 [data-slot='composer-drag-region']:hover,
@@ -1674,10 +1767,12 @@ body.guest-pointer-lock :is(webview, iframe) {
   opacity: 0.33;
 }
 
-[data-slot='composer-root']>.pointer-events-none {
-  background: linear-gradient(to bottom,
-      transparent,
-      color-mix(in srgb, var(--ui-chat-surface-background) 88%, transparent)) !important;
+[data-slot='composer-root'] > .pointer-events-none {
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    color-mix(in srgb, var(--ui-chat-surface-background) 88%, transparent)
+  ) !important;
 }
 
 [data-slot='composer-surface'] {
@@ -1720,8 +1815,8 @@ body.guest-pointer-lock :is(webview, iframe) {
 /* Tool/thinking blocks now live at message-text alignment (no leading
    chevron column to escape into), so their headers and bodies share a
    common left edge with the model's text. */
-[data-slot='aui_assistant-message-content']>[data-slot='tool-block'],
-[data-slot='aui_assistant-message-content']>[data-slot='aui_thinking-disclosure'] {
+[data-slot='aui_assistant-message-content'] > [data-slot='tool-block'],
+[data-slot='aui_assistant-message-content'] > [data-slot='aui_thinking-disclosure'] {
   width: 100%;
   max-width: 100%;
 }
@@ -1789,12 +1884,15 @@ body.guest-pointer-lock :is(webview, iframe) {
     0 0.625rem 1.75rem color-mix(in srgb, var(--dt-ring) 8%, transparent);
 }
 
-[data-slot='aui_assistant-message-content'] .aui-md [data-slot='code-card'][data-streaming='true'] [data-slot='code-card-body'] {
+[data-slot='aui_assistant-message-content']
+  .aui-md
+  [data-slot='code-card'][data-streaming='true']
+  [data-slot='code-card-body'] {
   -webkit-mask-image: linear-gradient(to bottom, black 0%, black calc(100% - 1.5rem), rgb(0 0 0 / 64%) 100%);
   mask-image: linear-gradient(to bottom, black 0%, black calc(100% - 1.5rem), rgb(0 0 0 / 64%) 100%);
 }
 
-[data-slot='aui_assistant-message-content'] .aui-md :not(pre)>code {
+[data-slot='aui_assistant-message-content'] .aui-md :not(pre) > code {
   background: var(--ui-inline-code-background);
   color: var(--ui-inline-code-foreground);
 }
@@ -1814,7 +1912,7 @@ body.guest-pointer-lock :is(webview, iframe) {
   border-spacing: 0;
 }
 
-[data-slot='aui_assistant-message-content'] .aui-md .aui-md-table>table,
+[data-slot='aui_assistant-message-content'] .aui-md .aui-md-table > table,
 [data-slot='aui_assistant-message-content'] .aui-md .aui-md-table thead,
 [data-slot='aui_assistant-message-content'] .aui-md .aui-md-table tbody,
 [data-slot='aui_assistant-message-content'] .aui-md .aui-md-table tr,
@@ -1927,14 +2025,16 @@ body.guest-pointer-lock :is(webview, iframe) {
    One gap between top-level blocks, whatever they are. Spelling out which
    *pairs* qualified meant the live status line (not tool, thinking or prose)
    fell through every branch and carried its own half-size margin instead. */
-[data-slot='aui_assistant-message-content']> :is([data-slot='tool-block'], [data-slot='aui_thinking-disclosure'], [data-slot='aui_turn-activity'], .aui-md)+ :is([data-slot='tool-block'], [data-slot='aui_thinking-disclosure'], [data-slot='aui_turn-activity'], .aui-md) {
+[data-slot='aui_assistant-message-content']
+  > :is([data-slot='tool-block'], [data-slot='aui_thinking-disclosure'], [data-slot='aui_turn-activity'], .aui-md)
+  + :is([data-slot='tool-block'], [data-slot='aui_thinking-disclosure'], [data-slot='aui_turn-activity'], .aui-md) {
   margin-top: var(--turn-block-gap);
 }
 
 /* Except prose ↔ prose: one reading column that happens to arrive as several
    parts, so it keeps the in-block paragraph rhythm. Same specificity as the
    rule above and deliberately after it. */
-[data-slot='aui_assistant-message-content']>.aui-md+.aui-md {
+[data-slot='aui_assistant-message-content'] > .aui-md + .aui-md {
   margin-top: var(--paragraph-gap);
 }
 
@@ -1944,7 +2044,9 @@ body.guest-pointer-lock :is(webview, iframe) {
    cards. Same list as the rule above minus prose — `data-conversation-scaffold`
    is the wrong hook here: it's absent on a multi-call tool GROUP, which is most
    of a real run, and present on rows nested inside one. */
-[data-slot='aui_assistant-message-content']> :is([data-slot='tool-block'], [data-slot='aui_thinking-disclosure'], [data-slot='aui_turn-activity'])+ :is([data-slot='tool-block'], [data-slot='aui_thinking-disclosure'], [data-slot='aui_turn-activity']) {
+[data-slot='aui_assistant-message-content']
+  > :is([data-slot='tool-block'], [data-slot='aui_thinking-disclosure'], [data-slot='aui_turn-activity'])
+  + :is([data-slot='tool-block'], [data-slot='aui_thinking-disclosure'], [data-slot='aui_turn-activity']) {
   margin-top: var(--scaffold-block-gap);
 }
 
@@ -1954,7 +2056,7 @@ body.guest-pointer-lock :is(webview, iframe) {
    on the row while it's open, so a collapsed edit rejoins the run. Margins on
    the block itself, not adjacency pairs: it needs the clearance whatever sits
    next to it, and adjacent margins collapse rather than stacking. */
-[data-slot='aui_assistant-message-content']>[data-tool-row][data-file-edit] {
+[data-slot='aui_assistant-message-content'] > [data-tool-row][data-file-edit] {
   margin-block: var(--turn-block-gap);
 }
 
@@ -1972,7 +2074,7 @@ body.guest-pointer-lock :is(webview, iframe) {
    flex gap between bubbles is the turn gap — half the block gap — which made
    the rhythm visibly tighten and then relax as a turn settled. Top it up so
    the column ticks at one interval either way. */
-[data-slot='aui_turn-pair']>[data-slot='aui_assistant-message-root']+[data-slot='aui_assistant-message-root'] {
+[data-slot='aui_turn-pair'] > [data-slot='aui_assistant-message-root'] + [data-slot='aui_assistant-message-root'] {
   margin-top: calc(var(--turn-block-gap) - var(--conversation-turn-gap));
 }
 
@@ -1981,9 +2083,19 @@ body.guest-pointer-lock :is(webview, iframe) {
    Topping up to the full block gap here is what made a live run relax between
    rows and then tighten once it rehydrated into one bubble. A bubble carrying
    an open diff is excluded — it keeps the full gap, same as in-flow. */
-[data-slot='aui_turn-pair']>[data-slot='aui_assistant-message-root']:has(> [data-slot='aui_assistant-message-content'] > :is([data-slot='tool-block'], [data-slot='aui_thinking-disclosure'], [data-slot='aui_turn-activity']):last-child):not(:has([data-file-edit]))+[data-slot='aui_assistant-message-root']:has(> [data-slot='aui_assistant-message-content'] > :is([data-slot='tool-block'],
-    [data-slot='aui_thinking-disclosure'],
-    [data-slot='aui_turn-activity']):first-child):not(:has([data-file-edit])) {
+[data-slot='aui_turn-pair']
+  > [data-slot='aui_assistant-message-root']:has(
+    > [data-slot='aui_assistant-message-content']
+      > :is([data-slot='tool-block'], [data-slot='aui_thinking-disclosure'], [data-slot='aui_turn-activity']):last-child
+  ):not(:has([data-file-edit]))
+  + [data-slot='aui_assistant-message-root']:has(
+    > [data-slot='aui_assistant-message-content']
+      > :is(
+        [data-slot='tool-block'],
+        [data-slot='aui_thinking-disclosure'],
+        [data-slot='aui_turn-activity']
+      ):first-child
+  ):not(:has([data-file-edit])) {
   margin-top: calc(var(--scaffold-block-gap) - var(--conversation-turn-gap));
 }
 
@@ -2188,7 +2300,6 @@ button[data-slot='aui_msg-reactions'] svg {
 }
 
 @media (prefers-reduced-motion: reduce) {
-
   .thread-jump-button[data-state='in'],
   .thread-jump-button[data-state='out'] {
     animation: none;
@@ -2232,10 +2343,12 @@ button[data-slot='aui_msg-reactions'] svg {
   width: 5.5rem;
   height: 7rem;
   border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
-  background: radial-gradient(120% 90% at 32% 26%,
-      color-mix(in srgb, var(--ui-accent) 14%, #fff) 0%,
-      #f4ecd8 46%,
-      #e4d3ad 100%);
+  background: radial-gradient(
+    120% 90% at 32% 26%,
+    color-mix(in srgb, var(--ui-accent) 14%, #fff) 0%,
+    #f4ecd8 46%,
+    #e4d3ad 100%
+  );
   box-shadow:
     inset -0.45rem -0.6rem 1.1rem color-mix(in srgb, #000 16%, transparent),
     inset 0.35rem 0.4rem 0.7rem color-mix(in srgb, #fff 70%, transparent),
@@ -2288,9 +2401,11 @@ button[data-slot='aui_msg-reactions'] svg {
   height: 0.8rem;
   border-radius: 50%;
   /* Lighter on light backgrounds (~20% less ink); dark mode keeps it grounded. */
-  background: radial-gradient(circle,
-      color-mix(in srgb, #000 var(--pet-egg-shadow-ink, 26%), transparent) 0%,
-      transparent 72%);
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, #000 var(--pet-egg-shadow-ink, 26%), transparent) 0%,
+    transparent 72%
+  );
   animation: pet-egg-shadow 2.4s ease-in-out infinite;
 }
 
@@ -2331,67 +2446,53 @@ button[data-slot='aui_msg-reactions'] svg {
 }
 
 @keyframes pet-egg-wobble {
-
   0%,
   62%,
   100% {
     transform: rotate(0deg);
   }
-
   8% {
     transform: rotate(-7deg);
   }
-
   16% {
     transform: rotate(6deg);
   }
-
   24% {
     transform: rotate(-5deg);
   }
-
   32% {
     transform: rotate(4deg);
   }
-
   40% {
     transform: rotate(0deg);
   }
-
   /* the "almost out" burst */
   70% {
     transform: rotate(-12deg);
   }
-
   76% {
     transform: rotate(12deg);
   }
-
   82% {
     transform: rotate(-9deg);
   }
-
   88% {
     transform: rotate(7deg);
   }
-
   94% {
     transform: rotate(-3deg);
   }
 }
 
 @keyframes pet-egg-glow {
-
   0%,
   100% {
     opacity: 0.35;
     transform: scale(0.92);
   }
-
   70% {
     opacity: 0.4;
   }
-
   84% {
     opacity: 0.85;
     transform: scale(1.08);
@@ -2399,14 +2500,12 @@ button[data-slot='aui_msg-reactions'] svg {
 }
 
 @keyframes pet-egg-shadow {
-
   0%,
   62%,
   100% {
     transform: scaleX(1);
     opacity: 0.6;
   }
-
   76% {
     transform: scaleX(0.8);
     opacity: 0.45;
@@ -2422,12 +2521,10 @@ button[data-slot='aui_msg-reactions'] svg {
     opacity: 0;
     transform: scale(0.35) translateY(0.4rem);
   }
-
   60% {
     opacity: 1;
     transform: scale(1.12) translateY(0);
   }
-
   100% {
     transform: scale(1) translateY(0);
   }
@@ -2438,12 +2535,10 @@ button[data-slot='aui_msg-reactions'] svg {
     opacity: 0;
     transform: scale(0.4);
   }
-
   60% {
     opacity: 1;
     transform: scale(1.18);
   }
-
   100% {
     transform: scale(1);
   }
@@ -2456,18 +2551,15 @@ button[data-slot='aui_msg-reactions'] svg {
 }
 
 @media (prefers-reduced-motion: reduce) {
-
   .pet-egg,
   .pet-egg__glow,
   .pet-egg-shadow,
   .pet-reveal {
     animation: none;
   }
-
   .reaction-pop {
     animation: none;
   }
-
   .pet-reveal {
     opacity: 1;
     transform: none;
@@ -2487,14 +2579,12 @@ button[data-slot='aui_msg-reactions'] svg {
 }
 
 @keyframes progress-slide {
-
   /* Old version animated `left: -42% → 100%`, forcing main-thread layout
      every frame for the whole hatch flow. The block is 40% of its track, so
      the same travel in units of its own width is -105% → 250%. */
   0% {
     transform: translateX(-105%);
   }
-
   100% {
     transform: translateX(250%);
   }
@@ -2771,6 +2861,37 @@ button[data-slot='aui_msg-reactions'] svg {
   pointer-events: auto;
 }
 
+/* A held band is the interface — clarify / approval / a live turn. It must
+   take clicks even if the composer never received focus. On click-through
+   hosts that is a deliberate dead zone over the game; on a prompt it is a
+   surface you cannot use. */
+[data-hud-shell][data-hud-held] [data-slot='composer-bounds'] {
+  pointer-events: auto;
+}
+
+/* Linux X11 is a solid window: ignore-mouse cannot restore, so a visible
+   band that still has pointer-events:none swallows the click and does
+   nothing. Once the band is up it is the surface. */
+[data-hud-shell][data-hud-input='solid'][data-hud-recent] [data-slot='composer-bounds'] {
+  pointer-events: auto;
+}
+
+/* Widgets and links opt in even when the band is a ghost, so a click-through
+   HUD can still answer a clarify option or open an OAuth URL without sitting
+   in the composer first. Children inherit auto from these roots. */
+[data-hud-shell]
+  :is(
+    [data-slot='clarify-inline'],
+    [data-clarify-choices],
+    [data-clarify-batch],
+    [data-slot='tool-approval-inline'],
+    [data-slot='tool-approval-fallback'],
+    [data-slot='tool-approval-actions'],
+    a[href]
+  ) {
+  pointer-events: auto;
+}
+
 /* Three states, not two. A turn landing brings the transcript up, but only part
    way — it is there to be glanced at over whatever you are actually doing, and
    full-strength text over another app reads as the HUD demanding attention it
@@ -2848,17 +2969,20 @@ button[data-slot='aui_msg-reactions'] svg {
    Widgets on the shared shell (components/chat/widget-shell.ts →
    `--ui-widget-surface-background`) and any chat-surface card are matched on
    their class, so new ones inherit this without touching the list. */
-[data-hud-shell] [data-slot='composer-bounds'] :is([data-slot='clarify-inline'],
-  [data-slot='tool-block'],
-  [data-slot='file-diff-panel'],
-  [data-slot='code-card'],
-  [data-slot='aui_system-message-root'],
-  [class*='ui-widget-surface-background'],
-  [class*='ui-chat-surface-background'],
-  pre,
-  input,
-  textarea,
-  select) {
+[data-hud-shell] [data-slot='composer-bounds']
+  :is(
+    [data-slot='clarify-inline'],
+    [data-slot='tool-block'],
+    [data-slot='file-diff-panel'],
+    [data-slot='code-card'],
+    [data-slot='aui_system-message-root'],
+    [class*='ui-widget-surface-background'],
+    [class*='ui-chat-surface-background'],
+    pre,
+    input,
+    textarea,
+    select
+  ) {
   --hud-overlay-ink: var(--ui-text-primary);
   --hud-overlay-ink-user: var(--ui-text-primary);
   text-shadow: none;
@@ -3127,7 +3251,7 @@ button[data-slot='aui_msg-reactions'] svg {
    Written as "keep the composer, hide its siblings" rather than a list of
    selectors, because those siblings carry no data-slot of their own — a list
    would silently miss whatever gets added to the dock next. */
-[data-hud-shell] [data-slot='composer-dock']>*:not([data-slot='composer-root']) {
+[data-hud-shell] [data-slot='composer-dock'] > *:not([data-slot='composer-root']) {
   display: none !important;
 }
 
@@ -3196,7 +3320,7 @@ button[data-slot='aui_msg-reactions'] svg {
    `absolute inset-0 -z-10` fill+glass div behind it (composerFill /
    composerSurfaceGlass). Two stacked fills read as a box inside a box, so the
    backing layer goes and the surface carries the single fill. */
-[data-hud-shell] [data-slot='composer-surface']>.pointer-events-none.absolute.inset-0 {
+[data-hud-shell] [data-slot='composer-surface'] > .pointer-events-none.absolute.inset-0 {
   display: none !important;
 }
 
@@ -3367,7 +3491,7 @@ button[data-slot='aui_msg-reactions'] svg {
 
 /* The dock's fade-to-surface gradient assumes a chat column behind it; over a
    transparent HUD it's a grey smear. */
-[data-hud-shell] [data-slot='composer-root']>.pointer-events-none {
+[data-hud-shell] [data-slot='composer-root'] > .pointer-events-none {
   display: none !important;
 }
 
@@ -3388,11 +3512,14 @@ html:has([data-hud-shell]) [data-slot='popover-content'] [class*='max-h-'] {
   max-height: max(5rem, calc(100dvh - 9rem)) !important;
 }
 
-/* The menu panels themselves: never taller than the window minus the bar. */
+/* The menu panels themselves: never taller than the window minus the bar.
+   Portalled out of the shell, they must still take the pointer — the HUD
+   defaults to none and a right-click menu that cannot be clicked is dead. */
 html:has([data-hud-shell]) [data-slot='dropdown-menu-content'],
 html:has([data-hud-shell]) [data-slot='popover-content'] {
   max-height: calc(100dvh - 4.5rem) !important;
   overflow-y: auto;
+  pointer-events: auto;
 }
 
 /* Hide the scrollbar — a HUD with a visible track stops reading as an overlay. */
