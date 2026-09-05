@@ -407,7 +407,7 @@ export const ja = defineLocale({
         header: 'まぶしい'
       },
       translucencyScopeTitle: '適用範囲',
-    translucencyScope: {
+      translucencyScope: {
         window: 'ウィンドウ全体',
         sidebar: 'サイドバーのみ'
       },
