@@ -416,7 +416,9 @@ function WallpaperSettingsPanel() {
       try {
         const result = await window.hermesDesktop?.importWallpaper?.(sourcePath)
 
-        if (result?.path) {setWallpaperCustomPath(result.path)}
+        if (result?.path) {
+          setWallpaperCustomPath(result.path)
+        }
       } catch (error) {
         notifyError(error, t.settings.appearance.wallpaperChoose)
       }

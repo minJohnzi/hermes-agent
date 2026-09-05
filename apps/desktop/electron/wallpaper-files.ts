@@ -32,7 +32,9 @@ export async function clearWallpaperFiles(wallpaperDir: string, keepPath?: strin
   try {
     entries = await fs.promises.readdir(wallpaperDir)
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {return}
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return
+    }
     throw error
   }
 
@@ -43,7 +45,9 @@ export async function clearWallpaperFiles(wallpaperDir: string, keepPath?: strin
       .filter(candidate => candidate !== keepPath)
       .map(candidate =>
         fs.promises.unlink(candidate).catch(error => {
-          if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {throw error}
+          if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+            throw error
+          }
         })
       )
   )
@@ -52,13 +56,19 @@ export async function clearWallpaperFiles(wallpaperDir: string, keepPath?: strin
 export async function importWallpaperFile(sourcePath: string, wallpaperDir: string): Promise<{ path: string }> {
   const stat = await fs.promises.stat(sourcePath)
 
-  if (!stat.isFile()) {throw new Error('Wallpaper source must be a file')}
+  if (!stat.isFile()) {
+    throw new Error('Wallpaper source must be a file')
+  }
 
-  if (stat.size > WALLPAPER_MAX_BYTES) {throw new Error('Wallpaper image exceeds the 16 MiB limit')}
+  if (stat.size > WALLPAPER_MAX_BYTES) {
+    throw new Error('Wallpaper image exceeds the 16 MiB limit')
+  }
 
   const ext = await detectedExtension(sourcePath)
 
-  if (!ext) {throw new Error('Wallpaper must be a valid JPG, PNG, or WebP image')}
+  if (!ext) {
+    throw new Error('Wallpaper must be a valid JPG, PNG, or WebP image')
+  }
 
   await fs.promises.mkdir(wallpaperDir, { recursive: true })
   const stem = `custom_backdrop_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`

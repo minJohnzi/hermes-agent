@@ -15,14 +15,7 @@ export type { HermesOpenTarget }
 // Native OS notifications (Electron `Notification`), separate from the in-app
 // toast feed in `notifications.ts`. Each kind toggles independently.
 export type NativeNotificationKind =
-  | 'approval'
-  | 'backgroundDone'
-  | 'credits'
-  | 'cron'
-  | 'input'
-  | 'plugin'
-  | 'turnDone'
-  | 'turnError'
+  'approval' | 'backgroundDone' | 'credits' | 'cron' | 'input' | 'plugin' | 'turnDone' | 'turnError'
 
 export const NATIVE_NOTIFICATION_KINDS: readonly NativeNotificationKind[] = [
   'approval',
