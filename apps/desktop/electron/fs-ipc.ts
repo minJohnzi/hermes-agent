@@ -10,6 +10,7 @@ import { app, ipcMain, shell } from 'electron'
 import { installDesktopPluginFromGit, probePluginRepo } from './desktop-plugin-install'
 import { readDirForIpc } from './fs-read-dir'
 import { gitRootForIpc } from './git-root'
+import { clearWallpaperFiles, importWallpaperFile } from './wallpaper-files'
 
 export interface FsIpcDeps {
   hermesHome: string
@@ -206,19 +207,18 @@ export function registerFsIpc({
   ipcMain.handle('hermes:wallpaper:import', async (_event, sourcePath) => {
     const src = String(sourcePath || '').trim()
 
-    if (!src || !fs.existsSync(src)) {
+    if (!src) {
       throw new Error('Invalid or missing source file')
     }
 
     const wallpaperDir = path.join(app.getPath('userData'), 'wallpaper')
-    await fs.promises.mkdir(wallpaperDir, { recursive: true })
 
-    const ext = path.extname(src) || '.png'
-    const fileName = `custom_backdrop_${Date.now()}${ext}`
-    const dest = path.join(wallpaperDir, fileName)
+    return importWallpaperFile(src, wallpaperDir)
+  })
 
-    await fs.promises.copyFile(src, dest)
+  ipcMain.handle('hermes:wallpaper:clear', async () => {
+    await clearWallpaperFiles(path.join(app.getPath('userData'), 'wallpaper'))
 
-    return { path: dest }
+    return true
   })
 }

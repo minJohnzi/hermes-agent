@@ -812,7 +812,8 @@ async def test_cron_profile_scan_runs_off_event_loop(isolated_profiles, monkeypa
     jobs = await _rt_cron.list_cron_jobs(profile="all")
     paused = await _rt_cron.pause_cron_job(worker_job["id"])
 
-    assert any(job["id"] == worker_job["id"] for job in jobs)
+    listed_worker = next(job for job in jobs if job["id"] == worker_job["id"])
+    assert listed_worker["profile"] == "worker_alpha"
     assert paused["profile"] == "worker_alpha"
     profile_scan_thread_ids = _drain_queue(profile_scan_threads)
     worker_thread_ids = _drain_queue(worker_threads)

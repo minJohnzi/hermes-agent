@@ -242,6 +242,7 @@ contextBridge.exposeInMainWorld('hermesDesktop', {
   selectPaths: options => ipcRenderer.invoke('hermes:selectPaths', options),
   selectSavePath: options => ipcRenderer.invoke('hermes:selectSavePath', options),
   importWallpaper: sourcePath => ipcRenderer.invoke('hermes:wallpaper:import', sourcePath),
+  clearWallpaper: () => ipcRenderer.invoke('hermes:wallpaper:clear'),
   writeClipboard: text => ipcRenderer.invoke('hermes:writeClipboard', text),
   readClipboard: () => ipcRenderer.invoke('hermes:readClipboard'),
   saveGatewayFile: payload => ipcRenderer.invoke('hermes:saveGatewayFile', payload),

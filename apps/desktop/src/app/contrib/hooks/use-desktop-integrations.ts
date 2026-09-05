@@ -2,11 +2,12 @@ import { useEffect, useRef } from 'react'
 
 import { closeActiveTab } from '@/app/chat/close-tab'
 import { commandFocusedPreview } from '@/app/chat/right-rail/preview-nav'
+import { openCronNotificationTarget } from '@/app/cron/notification-target'
 import { openSession } from '@/app/open-session'
 import { resolveDeepLinkAction } from '@/lib/deeplink-routes'
 import { pathFromHermesDeepLink, resolveHermesOpenPath } from '@/lib/hermes-open-target'
 import { storedSessionIdForNotification } from '@/lib/session-ids'
-import { decodeCronNotifyId, setCronFocusJobId } from '@/store/cron'
+import { decodeCronNotifyId } from '@/store/cron'
 import { requestMcpInstallFromDeepLink } from '@/store/mcp-deeplink-install'
 import { startMcpHealthChecker, stopMcpHealthChecker } from '@/store/mcp-health'
 import {
@@ -237,11 +238,10 @@ export function useDesktopIntegrations({
       if (payload.actionId) {
         invokePluginNotifyAction(payload.notifyId, payload.actionId)
       } else {
-        const cronJobId = payload.notifyId ? decodeCronNotifyId(payload.notifyId) : null
+        const cronTarget = payload.notifyId ? decodeCronNotifyId(payload.notifyId) : null
 
-        if (cronJobId) {
-          setCronFocusJobId(cronJobId)
-          navigate('/cron')
+        if (cronTarget) {
+          void openCronNotificationTarget(cronTarget, navigate)
 
           return
         }

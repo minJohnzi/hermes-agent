@@ -93,14 +93,37 @@ export const setCronFocusJobId = (id: null | string) => $cronFocusJobId.set(id)
 export const $cronReviewRequest = atom(0)
 export const requestCronReview = () => $cronReviewRequest.set($cronReviewRequest.get() + 1)
 
-export function encodeCronNotifyId(jobId: string): string {
-  return `cron-focus:${encodeURIComponent(jobId)}`
+export interface CronNotificationTarget {
+  connectionId: string
+  jobId: string
+  profile: string
+  runAt?: string
 }
 
-export function decodeCronNotifyId(notifyId: string): string | null {
-  if (notifyId.startsWith('cron-focus:')) {
+export function encodeCronNotifyId(target: CronNotificationTarget): string {
+  return `cron-focus:${encodeURIComponent(JSON.stringify(target))}`
+}
+
+export function decodeCronNotifyId(notifyId: string): CronNotificationTarget | null {
+  if (!notifyId.startsWith('cron-focus:')) {
+    return null
+  }
+
+  try {
+    const decoded = decodeURIComponent(notifyId.slice(11))
+    const parsed = JSON.parse(decoded) as Partial<CronNotificationTarget>
+
+    if (
+      typeof parsed.connectionId === 'string' &&
+      typeof parsed.jobId === 'string' &&
+      typeof parsed.profile === 'string'
+    ) {
+      return parsed as CronNotificationTarget
+    }
+  } catch {
+    // Legacy notification ids contained only an encoded job id.
     try {
-      return decodeURIComponent(notifyId.slice(11))
+      return { connectionId: '', jobId: decodeURIComponent(notifyId.slice(11)), profile: '' }
     } catch {
       return null
     }

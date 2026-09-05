@@ -6,30 +6,69 @@ import { useI18n } from '@/i18n'
 import { $cronJobs, encodeCronNotifyId, setCronFocusJobId } from '@/store/cron'
 import { dispatchNativeNotification } from '@/store/native-notifications'
 import { notify } from '@/store/notifications'
-import { $activeProfile } from '@/store/profile'
-import { $connection } from '@/store/session'
+import { $profileScope, sidebarProfileForScope } from '@/store/profile'
+import { $connection, $gatewayState } from '@/store/session'
+import type { CronJob } from '@/types/hermes'
 
 interface Baseline {
   lastRunAt: string | null
 }
 
 export function CronNotificationBridge() {
-  const profile = useStore($activeProfile)
+  const profile = sidebarProfileForScope(useStore($profileScope))
   const connectionId = useStore($connection)?.connectionId ?? 'local'
+  const gatewayState = useStore($gatewayState)
   const scopeKey = `${connectionId}:${profile}`
 
-  return <CronNotificationBridgeImpl connectionId={connectionId} key={scopeKey} profile={profile} />
+  return (
+    <CronNotificationBridgeImpl
+      connectionId={connectionId}
+      gatewayState={gatewayState}
+      key={scopeKey}
+      profile={profile}
+    />
+  )
 }
 
-function CronNotificationBridgeImpl({ connectionId, profile }: { connectionId: string; profile: string }) {
+function CronNotificationBridgeImpl({
+  connectionId,
+  gatewayState,
+  profile
+}: {
+  connectionId: string
+  gatewayState: string
+  profile: string
+}) {
   const { t } = useI18n()
   const navigate = useNavigate()
   const jobs = useStore($cronJobs)
 
   const baselineCache = useRef<Map<string, Baseline>>(new Map())
+  const jobsAtDisconnect = useRef<CronJob[] | null>(null)
+  const needsReconnectBaseline = useRef(false)
 
   // eslint-disable-next-line no-restricted-syntax
   useEffect(() => {
+    if (gatewayState !== 'open') {
+      needsReconnectBaseline.current = true
+      jobsAtDisconnect.current = jobs
+      baselineCache.current = new Map()
+
+      return
+    }
+
+    if (needsReconnectBaseline.current) {
+      if (jobs === jobsAtDisconnect.current) {
+        return
+      }
+
+      needsReconnectBaseline.current = false
+      jobsAtDisconnect.current = null
+      baselineCache.current = new Map(jobs.map(job => [job.id, { lastRunAt: job.last_run_at ?? null }]))
+
+      return
+    }
+
     const baseline = baselineCache.current
     const newBaseline = new Map<string, Baseline>()
 
@@ -44,7 +83,8 @@ function CronNotificationBridgeImpl({ connectionId, profile }: { connectionId: s
       }
 
       // We already know about this job. Did its last_run_at change to a new timestamp?
-      const newlyRun = job.last_run_at !== null && existing.lastRunAt !== job.last_run_at
+      const lastRunAt = job.last_run_at ?? null
+      const newlyRun = lastRunAt !== null && existing.lastRunAt !== lastRunAt
 
       if (newlyRun) {
         // Dispatch notification
@@ -58,7 +98,8 @@ function CronNotificationBridgeImpl({ connectionId, profile }: { connectionId: s
           ? job.last_error.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 180)
           : ''
 
-        const notifyId = encodeCronNotifyId(job.id)
+        const jobProfile = job.profile || profile
+        const notifyId = encodeCronNotifyId({ connectionId, jobId: job.id, profile: jobProfile, runAt: lastRunAt })
         const tag = `cron-run:${connectionId}:${profile}:${job.id}:${job.last_run_at}`
 
         // 1. Try foreground notification (NotificationStack)
@@ -112,7 +153,7 @@ function CronNotificationBridgeImpl({ connectionId, profile }: { connectionId: s
     }
 
     baselineCache.current = newBaseline
-  }, [jobs, connectionId, profile, t, navigate])
+  }, [jobs, connectionId, gatewayState, profile, t, navigate])
 
   return null
 }

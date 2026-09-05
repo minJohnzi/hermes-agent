@@ -91,7 +91,8 @@ def _list_cron_jobs_sync(profile: str = "all"):
         if not name:
             continue
         try:
-            jobs.extend(_call_cron_for_profile(name, "list_jobs", True))
+            for job in _call_cron_for_profile(name, "list_jobs", True):
+                jobs.append({**job, "profile": name})
         except Exception:
             _log.exception("Failed to list cron jobs for profile %s", name)
     return jobs

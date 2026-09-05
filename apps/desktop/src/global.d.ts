@@ -257,6 +257,7 @@ declare global {
       readPluginSource?: (filePath: string) => Promise<HermesReadFileTextResult>
       selectPaths: (options?: HermesSelectPathsOptions) => Promise<string[]>
       importWallpaper?: (sourcePath: string) => Promise<{ path: string }>
+      clearWallpaper?: () => Promise<boolean>
       /** Native save dialog; returns the chosen path or null on cancel. */
       selectSavePath?: (options?: {
         defaultPath?: string

@@ -407,19 +407,28 @@ function WallpaperSettingsPanel() {
   const handleChooseImage = async () => {
     const paths = await window.hermesDesktop?.selectPaths?.({
       title: t.settings.appearance.wallpaperChooseDialog,
-      filters: [{ name: 'Images', extensions: ['jpg', 'jpeg', 'png', 'webp', 'gif'] }]
+      filters: [{ name: 'Images', extensions: ['jpg', 'jpeg', 'png', 'webp'] }]
     })
 
     if (paths && paths.length > 0) {
       const sourcePath = paths[0]
-      const result = await window.hermesDesktop?.importWallpaper?.(sourcePath)
 
-      if (result && result.path) {
-        setWallpaperCustomPath(result.path)
-      } else {
-        // Fallback if IPC is unavailable
-        setWallpaperCustomPath(sourcePath)
+      try {
+        const result = await window.hermesDesktop?.importWallpaper?.(sourcePath)
+
+        if (result?.path) {setWallpaperCustomPath(result.path)}
+      } catch (error) {
+        notifyError(error, t.settings.appearance.wallpaperChoose)
       }
+    }
+  }
+
+  const handleClearImage = async () => {
+    try {
+      await window.hermesDesktop?.clearWallpaper?.()
+      setWallpaperCustomPath(null)
+    } catch (error) {
+      notifyError(error, t.settings.appearance.wallpaperClear)
     }
   }
 
@@ -448,7 +457,7 @@ function WallpaperSettingsPanel() {
                   {t.settings.appearance.wallpaperChoose}
                 </Button>
                 {settings.customPath && (
-                  <Button onClick={() => setWallpaperCustomPath(null)} size="inline" variant="text">
+                  <Button onClick={() => void handleClearImage()} size="inline" variant="text">
                     {t.settings.appearance.wallpaperClear}
                   </Button>
                 )}
@@ -467,15 +476,27 @@ function WallpaperSettingsPanel() {
       </GlassRow>
 
       <GlassRow label={t.settings.appearance.wallpaperOpacity}>
-        <TranslucencySlider label={t.settings.appearance.wallpaperOpacity} onChange={setWallpaperOpacity} value={settings.opacity} />
+        <TranslucencySlider
+          label={t.settings.appearance.wallpaperOpacity}
+          onChange={setWallpaperOpacity}
+          value={settings.opacity}
+        />
       </GlassRow>
 
       <GlassRow label={t.settings.appearance.wallpaperDim}>
-        <TranslucencySlider label={t.settings.appearance.wallpaperDimDesc} onChange={setWallpaperDim} value={settings.dim} />
+        <TranslucencySlider
+          label={t.settings.appearance.wallpaperDimDesc}
+          onChange={setWallpaperDim}
+          value={settings.dim}
+        />
       </GlassRow>
 
       <GlassRow label={t.settings.appearance.wallpaperBlur}>
-        <TranslucencySlider label={t.settings.appearance.wallpaperBlur} onChange={setWallpaperBlur} value={settings.blur} />
+        <TranslucencySlider
+          label={t.settings.appearance.wallpaperBlur}
+          onChange={setWallpaperBlur}
+          value={settings.blur}
+        />
       </GlassRow>
 
       <GlassRow label={t.settings.appearance.wallpaperFit}>

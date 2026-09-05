@@ -4,8 +4,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { setCronJobs } from '@/store/cron'
 import { dispatchNativeNotification } from '@/store/native-notifications'
 import { notify } from '@/store/notifications'
-import { $activeProfile } from '@/store/profile'
-import { $connection } from '@/store/session'
+import { $activeGatewayProfile, $activeProfile, $showAllProfiles } from '@/store/profile'
+import { $connection, $gatewayState } from '@/store/session'
 import type { CronJob } from '@/types/hermes'
 
 import { CronNotificationBridge } from './cron-notification-bridge'
@@ -52,7 +52,10 @@ describe('CronNotificationBridge', () => {
     act(() => {
       setCronJobs([])
       $activeProfile.set('local')
+      $activeGatewayProfile.set('default')
+      $showAllProfiles.set(false)
       $connection.set(null)
+      $gatewayState.set('open')
     })
     setWindowState(true, false) // Default to foreground
   })
@@ -92,6 +95,32 @@ describe('CronNotificationBridge', () => {
     act(() => {
       setCronJobs([{ ...job, name: 'Changed Name' }])
     })
+    rerender(<CronNotificationBridge />)
+
+    expect(notify).not.toHaveBeenCalled()
+  })
+
+  it('does not treat an omitted timestamp as a completed run', () => {
+    const job = { id: 'j1', name: 'Job A' } as CronJob
+    act(() => setCronJobs([job]))
+    const { rerender } = renderBridge()
+
+    act(() => setCronJobs([{ ...job }]))
+    rerender(<CronNotificationBridge />)
+
+    expect(notify).not.toHaveBeenCalled()
+  })
+
+  it('uses the first refreshed snapshot after reconnect as a new baseline', () => {
+    const job = { id: 'j1', last_run_at: 't1', last_status: 'ok', name: 'Job A' } as CronJob
+    act(() => setCronJobs([job]))
+    const { rerender } = renderBridge()
+
+    act(() => $gatewayState.set('closed'))
+    rerender(<CronNotificationBridge />)
+    act(() => $gatewayState.set('open'))
+    rerender(<CronNotificationBridge />)
+    act(() => setCronJobs([{ ...job, last_run_at: 't2' }]))
     rerender(<CronNotificationBridge />)
 
     expect(notify).not.toHaveBeenCalled()
@@ -209,7 +238,7 @@ describe('CronNotificationBridge', () => {
     const { rerender } = renderBridge()
     // Change profile and jobs simultaneously (simulating connection switch receiving new state)
     act(() => {
-      $activeProfile.set('remote')
+      $activeGatewayProfile.set('remote')
       setCronJobs([{ ...job, last_run_at: 't2' }])
     })
     rerender(<CronNotificationBridge />)

@@ -48,10 +48,13 @@ describe('cron jobs request fencing', () => {
 
 describe('cron focus ID encoding', () => {
   it('encodes and decodes job ID safely', () => {
-    const jobId = 'test/job/id with spaces'
-    const notifyId = encodeCronNotifyId(jobId)
-    expect(notifyId).toBe('cron-focus:test%2Fjob%2Fid%20with%20spaces')
-    expect(decodeCronNotifyId(notifyId)).toBe(jobId)
+    const target = { connectionId: 'vps', jobId: 'test/job/id with spaces', profile: 'research', runAt: 't2' }
+    const notifyId = encodeCronNotifyId(target)
+    expect(decodeCronNotifyId(notifyId)).toEqual(target)
+  })
+
+  it('decodes legacy job-only IDs', () => {
+    expect(decodeCronNotifyId('cron-focus:test%2Fjob')).toEqual({ connectionId: '', jobId: 'test/job', profile: '' })
   })
 
   it('returns null for unrelated notification IDs', () => {
