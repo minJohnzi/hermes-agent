@@ -29,6 +29,12 @@ const RGB_FN_RE = /rgba?\(\s*([\d.]+)\s*[,\s]\s*([\d.]+)\s*[,\s]\s*([\d.]+)\s*(?
 const SRGB_FN_RE = /^color\(\s*srgb\s+([\d.]+%?)\s+([\d.]+%?)\s+([\d.]+%?)(?:\s*[/\s]+\s*([\d.%]+))?\s*\)$/i
 const HEX_RE = /^#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i
 
+export interface MathClipboardPayload {
+  hasMath: boolean
+  plain: string
+  html: string
+}
+
 /** Parse one component: percentage or 0–255 integer. */
 const channelValue = (raw: string): number => {
   const v = raw.trim()
@@ -224,12 +230,8 @@ export function selectionInkLuma(sel: Selection, doc: Document): number | null {
  * compose font. Naming the generic family keeps the paste sans like the app
  * renders it, while each platform resolves it to its own system face.
  */
-export function serializeSelectionStructure(sel: Selection, doc: Document): string {
-  const container = doc.createElement('div')
-
-  for (let i = 0; i < sel.rangeCount; i++) {
-    container.append(sel.getRangeAt(i).cloneContents())
-  }
+function serializeCopiedContainer(source: HTMLElement, doc: Document): string {
+  const container = source.cloneNode(true) as HTMLElement
 
   for (const el of container.querySelectorAll('[style]')) {
     el.removeAttribute('style')
@@ -255,6 +257,128 @@ export function serializeSelectionStructure(sel: Selection, doc: Document): stri
   return wrapper.outerHTML
 }
 
+export function serializeSelectionStructure(sel: Selection, doc: Document): string {
+  const container = doc.createElement('div')
+
+  for (let i = 0; i < sel.rangeCount; i++) {
+    container.append(sel.getRangeAt(i).cloneContents())
+  }
+
+  return serializeCopiedContainer(container, doc)
+}
+
+function closestKatexCopyBoundary(node: Node): Element | null {
+  const element = node.nodeType === Node.ELEMENT_NODE ? (node as Element) : node.parentElement
+  const katex = element?.closest('.katex')
+
+  return katex?.closest('.katex-display') ?? katex ?? null
+}
+
+function cloneSelectionForMathCopy(sel: Selection, doc: Document): HTMLDivElement {
+  const container = doc.createElement('div')
+
+  for (let i = 0; i < sel.rangeCount; i++) {
+    const range = sel.getRangeAt(i).cloneRange()
+    const startMath = closestKatexCopyBoundary(range.startContainer)
+    const endMath = closestKatexCopyBoundary(range.endContainer)
+
+    if (startMath) {
+      range.setStartBefore(startMath)
+    }
+
+    if (endMath) {
+      range.setEndAfter(endMath)
+    }
+
+    if (i > 0) {
+      container.append(doc.createTextNode('\n'))
+    }
+
+    container.append(range.cloneContents())
+  }
+
+  return container
+}
+
+function katexTexSource(element: Element): string | null {
+  const annotation =
+    element.querySelector('.katex-mathml annotation[encoding="application/x-tex"]') ??
+    element.querySelector('annotation[encoding="application/x-tex"]') ??
+    element.querySelector('annotation')
+
+  return annotation?.textContent ?? null
+}
+
+function replaceKatexWithTex(container: HTMLElement, doc: Document): boolean {
+  let changed = false
+
+  // Display boundaries must be replaced before their nested `.katex` nodes,
+  // otherwise the display/inline distinction is lost.
+  for (const display of container.querySelectorAll('.katex-display')) {
+    const tex = katexTexSource(display)
+
+    if (tex === null) {
+      continue
+    }
+
+    const replacement = doc.createElement('div')
+
+    replacement.textContent = `$$${tex}$$`
+    display.replaceWith(replacement)
+    changed = true
+  }
+
+  for (const katex of container.querySelectorAll('.katex')) {
+    const tex = katexTexSource(katex)
+
+    if (tex === null) {
+      continue
+    }
+
+    const replacement = doc.createElement('span')
+
+    replacement.textContent = `$${tex}$`
+    katex.replaceWith(replacement)
+    changed = true
+  }
+
+  return changed
+}
+
+function containerPlainText(container: HTMLElement, doc: Document): string {
+  const probe = container.cloneNode(true) as HTMLElement
+
+  probe.setAttribute('aria-hidden', 'true')
+  probe.style.position = 'fixed'
+  probe.style.left = '-100000px'
+  probe.style.top = '0'
+  probe.style.width = '1000px'
+  probe.style.whiteSpace = 'pre-wrap'
+  probe.style.pointerEvents = 'none'
+  doc.body.append(probe)
+
+  try {
+    return typeof probe.innerText === 'string' ? probe.innerText : (probe.textContent ?? '')
+  } finally {
+    probe.remove()
+  }
+}
+
+export function buildMathClipboardPayload(sel: Selection, doc: Document): MathClipboardPayload {
+  const container = cloneSelectionForMathCopy(sel, doc)
+  const hasMath = replaceKatexWithTex(container, doc)
+
+  if (!hasMath) {
+    return { hasMath: false, plain: '', html: '' }
+  }
+
+  return {
+    hasMath: true,
+    plain: containerPlainText(container, doc),
+    html: serializeCopiedContainer(container, doc)
+  }
+}
+
 function selectionStartsInEditable(sel: Selection): boolean {
   const anchor = sel.anchorNode
 
@@ -270,10 +394,9 @@ function selectionStartsInEditable(sel: Selection): boolean {
 /**
  * Install the document-level `copy` interceptor. Returns a dispose function.
  *
- * Runs in the CAPTURE phase so inner handlers cannot run first. Only an
- * off-scheme selection is intercepted (payload owned and rewritten); every
- * other copy — same-scheme, editable-field, empty — passes through to
- * Chromium's default untouched.
+ * Runs in the CAPTURE phase so inner handlers cannot run first. An off-scheme
+ * selection or a selection containing KaTeX is intercepted; all other copies
+ * — same-scheme, editable-field, empty — pass through to Chromium unchanged.
  */
 export function installSelectionCopyColorGuard(doc: Document = document): () => void {
   const trace = (entry: Record<string, unknown>) => {
@@ -299,10 +422,14 @@ export function installSelectionCopyColorGuard(doc: Document = document): () => 
       return
     }
 
+    const mathPayload = buildMathClipboardPayload(sel, doc)
     const mode = renderedMode(doc)
-    const inkLuma = selectionInkLuma(sel, doc)
+    // Math selections own their payload independently of theme colors. Skipping
+    // the paint probe also avoids asking browser CSS engines to score MathML.
+    const inkLuma = mathPayload.hasMath ? null : selectionInkLuma(sel, doc)
+    const offScheme = inkLuma !== null && isOppositeScheme(inkLuma, mode)
 
-    if (inkLuma === null || !isOppositeScheme(inkLuma, mode)) {
+    if (!mathPayload.hasMath && !offScheme) {
       trace({ step: inkLuma === null ? 'no-ink' : 'same-scheme', inkLuma, mode })
 
       return
@@ -314,8 +441,8 @@ export function installSelectionCopyColorGuard(doc: Document = document): () => 
       return
     }
 
-    const plain = sel.toString()
-    const html = serializeSelectionStructure(sel, doc)
+    const plain = mathPayload.hasMath ? mathPayload.plain : sel.toString()
+    const html = mathPayload.hasMath ? mathPayload.html : serializeSelectionStructure(sel, doc)
 
     // Owning the payload is the only way to change it: Chromium's own
     // serialization is produced after handlers decline, and preventDefault
@@ -323,7 +450,13 @@ export function installSelectionCopyColorGuard(doc: Document = document): () => 
     event.preventDefault()
     clipboard.setData('text/plain', plain)
     clipboard.setData('text/html', html)
-    trace({ step: 'owned-payload', mode, inkLuma, plainChars: plain.length, htmlChars: html.length })
+    trace({
+      step: mathPayload.hasMath ? 'owned-math-payload' : 'owned-payload',
+      mode,
+      inkLuma,
+      plainChars: plain.length,
+      htmlChars: html.length
+    })
   }
 
   doc.addEventListener('copy', onCopy, true)

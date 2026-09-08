@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
+  buildMathClipboardPayload,
   installSelectionCopyColorGuard,
   selectionInkLuma,
   serializeSelectionStructure,
@@ -189,6 +190,64 @@ describe('serializeSelectionStructure', () => {
   })
 })
 
+describe('buildMathClipboardPayload', () => {
+  afterEach(() => {
+    window.getSelection()?.removeAllRanges()
+  })
+
+  it('replaces inline KaTeX with its TeX source without visual duplication', () => {
+    const host = armSelection(
+      String.raw`<p>存在 <span class="katex"><span class="katex-mathml"><math><semantics><annotation encoding="application/x-tex">\xi\in(0,a)</annotation></semantics></math></span><span class="katex-html">ξ∈(0,a)</span></span>，使得</p>`
+    )
+
+    const payload = buildMathClipboardPayload(window.getSelection()!, document)
+
+    expect(payload.hasMath).toBe(true)
+    expect(payload.plain).toContain(String.raw`$\xi\in(0,a)$`)
+    expect(payload.plain).not.toContain('ξ∈(0,a)')
+    expect(payload.html).not.toContain('katex-')
+    expect(payload.html).not.toContain('application/x-tex')
+
+    host.remove()
+  })
+
+  it('uses display delimiters for display KaTeX', () => {
+    const host = armSelection(
+      String.raw`<p>因此</p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><annotation encoding="application/x-tex">\frac{1}{\sqrt{ab}}</annotation></semantics></math></span><span class="katex-html">visual fraction</span></span></span><p>成立。</p>`
+    )
+
+    const payload = buildMathClipboardPayload(window.getSelection()!, document)
+
+    expect(payload.hasMath).toBe(true)
+    expect(payload.plain).toContain(String.raw`$$\frac{1}{\sqrt{ab}}$$`)
+    expect(payload.plain).not.toContain('visual fraction')
+    expect(payload.html).not.toContain('katex-display')
+
+    host.remove()
+  })
+
+  it('expands a partial formula selection to the complete inline KaTeX node', () => {
+    const host = document.createElement('div')
+
+    host.innerHTML = String.raw`<p>比较 <span class="katex"><span class="katex-mathml"><math><semantics><annotation encoding="application/x-tex">\sqrt{ab}</annotation></semantics></math></span><span class="katex-html">√ab</span></span> 即可。</p>`
+    document.body.append(host)
+
+    const visual = host.querySelector('.katex-html')!.firstChild!
+    const range = document.createRange()
+
+    range.selectNodeContents(visual)
+    window.getSelection()?.removeAllRanges()
+    window.getSelection()?.addRange(range)
+
+    const payload = buildMathClipboardPayload(window.getSelection()!, document)
+
+    expect(payload.hasMath).toBe(true)
+    expect(payload.plain).toBe(String.raw`$\sqrt{ab}$`)
+
+    host.remove()
+  })
+})
+
 describe('installSelectionCopyColorGuard', () => {
   beforeEach(() => {
     document.documentElement.dataset.hermesMode = 'dark'
@@ -233,6 +292,27 @@ describe('installSelectionCopyColorGuard', () => {
 
       expect(preventDefault).not.toHaveBeenCalled()
       expect(setData).not.toHaveBeenCalled()
+    } finally {
+      dispose()
+      host.remove()
+    }
+  })
+
+  it('owns a KaTeX selection even when color cleanup is unnecessary', () => {
+    const dispose = installSelectionCopyColorGuard(document)
+
+    const host = armSelection(
+      String.raw`<p>比较 <span class="katex"><span class="katex-mathml"><math><semantics><annotation encoding="application/x-tex">\xi</annotation></semantics></math></span><span class="katex-html">ξ</span></span> 即可。</p>`
+    )
+
+    try {
+      const { event, setData, preventDefault } = makeCopyEvent()
+
+      document.body.dispatchEvent(event)
+
+      expect(preventDefault).toHaveBeenCalled()
+      expect(setData.mock.calls.find(([type]) => type === 'text/plain')?.[1]).toContain(String.raw`$\xi$`)
+      expect(setData.mock.calls.find(([type]) => type === 'text/plain')?.[1]).not.toContain('ξ')
     } finally {
       dispose()
       host.remove()
