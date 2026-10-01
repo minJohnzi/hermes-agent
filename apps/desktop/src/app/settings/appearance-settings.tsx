@@ -547,7 +547,6 @@ function WallpaperSettingsPanel() {
   )
 }
 
-export function AppearanceSettings() {
 interface AppearanceSettingsProps {
   subpage?: string
 }
@@ -1102,9 +1101,6 @@ export function AppearanceSettings({ subpage }: AppearanceSettingsProps = {}) {
             title={a.reactionsTitle}
           />
 
-          <ListRow
-            action={
-              <div className="flex flex-col items-end gap-1.5">
           {show('chat-display') && (
             <ListRow
               action={
